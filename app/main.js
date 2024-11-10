@@ -30,12 +30,14 @@ const TOKENS = {
   ";": "SEMICOLON",
   "*": "STAR",
 
+  "!": {
+    "default": "BANG",
+    "=": "BANG_EQUAL",
+  },
   "=" : {
     "default": "EQUAL",
     "=": "EQUAL_EQUAL"
   },
-
-  // "==": "EQUAL_EQUAL",
 }
 
 
