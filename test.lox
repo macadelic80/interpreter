@@ -1,5 +1,1 @@
-(	
- )
-()// Comment
-// ok
-()!/*
+("baz"+"world") != "other_string"

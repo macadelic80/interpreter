@@ -1,6 +1,6 @@
 import fs from "fs";
 
-const args = process.argv.slice(2); // Skip the first two arguments (node path and script path)
+const args = process.argv.slice(2); 
 
 if (args.length < 2) {
   console.error("Usage: ./your_program.sh tokenize <filename>");
@@ -26,6 +26,7 @@ const TOKENS = {
   "{": "LEFT_BRACE",
   "}": "RIGHT_BRACE",
 
+  "\"": "DQUOTE",
   ",": "COMMA",
   ".": "DOT",
   "-": "MINUS",
@@ -56,46 +57,75 @@ const TOKENS = {
 }
 
 
+const scanString = (string, lineIndex) => {
+  const unterminatedString = new Error(`[line ${lineIndex + 1}] Error: Unterminated string.`);
+  if (!string.length) {
+    return unterminatedString;
+  }
+  for (let charIndex = 0; charIndex < string.length; charIndex++) {
+    const char = string[charIndex];
+    if (char === "\"") {
+      const literal = string.substring(0, charIndex); 
+      return literal;
+    }
+  }
+  return unterminatedString;
+}
+
+
 const scanChars = fileContent => {
   const lines = fileContent.split("\n");
   let inError = false;
-  lines.forEach((line, lineIndex) => {
-    let ignoredIndexes = [];
-    let ignoredCurrentLine = false;
-    [...line].forEach((char, charIndex) => {
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++){
+    const line = lines[lineIndex];
+    for (let charIndex = 0; charIndex < line.length; charIndex++){
+      const char = line[charIndex];
       const tokenData = TOKENS[char] || null;
-      let tokenName = null;
-      let token = null;
+      let tokenType = null;
+      let lexeme = null;
+      let literal = null;
       const isWhiteSpace = ["SPACE", "TAB", "NEWLINE"].includes(tokenData);
-      if (
-        isWhiteSpace ||
-        ignoredCurrentLine ||
-        ignoredIndexes.includes(charIndex)) {
-        return ;
+
+      if (isWhiteSpace) {
+        continue ;
       }
+
       if (tokenData) {
         if (typeof tokenData === "string" || charIndex == line.length - 1) {
-          tokenName = typeof tokenData === "string" ? tokenData : tokenData.default;
-          token = char;
+          if (tokenData == "DQUOTE") {
+            const res = scanString(line.substring(charIndex + 1), lineIndex);
+            if (res instanceof Error) {
+              console.error(res.message);
+              inError = true;
+              break;
+            } else {
+              tokenType = "STRING";
+              literal = res;
+              lexeme = `"${res}"`;
+              charIndex += res.length + 1
+            }
+          } else {
+            tokenType = typeof tokenData === "string" ? tokenData : tokenData.default;
+            lexeme = char;
+          }
         }  else {
           const nextChar = line[charIndex + 1];
-          tokenName = tokenData[nextChar] || tokenData.default;
-          token = nextChar in tokenData ? `${char}${nextChar}`: char;
+          tokenType = tokenData[nextChar] || tokenData.default;
+          lexeme = nextChar in tokenData ? `${char}${nextChar}`: char;
           if (nextChar in tokenData) {
-            ignoredIndexes.push(charIndex + 1);
+            charIndex++;
           }
         }
-        if (tokenName === "COMMENT") {
-          ignoredCurrentLine = true;
-          return ;
+        if (tokenType === "COMMENT") {
+          break;
         }
-        console.log(`${tokenName} ${token} null`);
+        console.log(`${tokenType} ${lexeme} ${literal}`);
       } else {
         console.error(`[line ${lineIndex + 1}] Error: Unexpected character: ${char}`)
         inError = true;
       }
-    })
-  })
+    }
+  }
   console.log("EOF  null");
   return inError ? 65 : 0;
 }
