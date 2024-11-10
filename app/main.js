@@ -30,6 +30,10 @@ const TOKENS = {
   ";": "SEMICOLON",
   "*": "STAR",
 
+  "/": {
+    "default": "SLASH",
+    "/": "COMMENT"
+  },
   "<": {
     "default": "LESS",
     "=": "LESS_EQUAL",
@@ -54,8 +58,9 @@ const scan_chars = fileContent => {
   let inError = false;
   lines.forEach((line, lineIndex) => {
     let ignoredIndexes = [];
+    let ignoredCurrentLine = false;
     [...line].forEach((char, charIndex) => {
-      if (ignoredIndexes.includes(charIndex)) {
+      if (ignoredCurrentLine || ignoredIndexes.includes(charIndex)) {
         return ;
       }
       const tokenData = TOKENS[char] || null;
@@ -72,7 +77,11 @@ const scan_chars = fileContent => {
           if (nextChar in tokenData) {
             ignoredIndexes.push(charIndex + 1);
           }
-        }   
+        }
+        if (tokenName === "COMMENT") {
+          ignoredCurrentLine = true;
+          return ;
+        }
         console.log(`${tokenName} ${token} null`);
       } else {
         console.error(`[line ${lineIndex + 1}] Error: Unexpected character: ${char}`)
