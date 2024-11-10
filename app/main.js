@@ -14,17 +14,27 @@ if (command !== "tokenize") {
   process.exit(1);
 }
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-console.error("Logs from your program will appear here!");
-
 const filename = args[1];
+
+
+const scan_parenthesis = fileContent => {
+  const lines = fileContent.split("\n");
+  lines.forEach(line => {
+    [...line].forEach(char => {
+      if ("()".includes(char))
+        console.log(`${char === "(" ? "LEFT" : "RIGHT"}_PAREN ${char} null`);
+    })
+  })
+  console.log("EOF  null");
+}
+
 
 // Uncomment this block to pass the first stage
 //
 const fileContent = fs.readFileSync(filename, "utf8");
 
 if (fileContent.length !== 0) {
-  throw new Error("Scanner not implemented");
+  scan_parenthesis(fileContent);
 } else {
   console.log("EOF  null");
 }
