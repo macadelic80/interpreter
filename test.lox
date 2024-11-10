@@ -1,1 +1,1 @@
-("baz"+"world") != "other_string"
+(64+38) > 73 != ("Success" != "Failure") != (57 >= 22)

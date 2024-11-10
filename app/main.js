@@ -27,6 +27,18 @@ const TOKENS = {
   "}": "RIGHT_BRACE",
 
   "\"": "DQUOTE",
+
+  "0": "NUMBER",
+  "1": "NUMBER",
+  "2": "NUMBER",
+  "3": "NUMBER",
+  "4": "NUMBER",
+  "5": "NUMBER",
+  "6": "NUMBER",
+  "7": "NUMBER",
+  "8": "NUMBER",
+  "9": "NUMBER",
+
   ",": "COMMA",
   ".": "DOT",
   "-": "MINUS",
@@ -72,6 +84,32 @@ const scanString = (string, lineIndex) => {
   return unterminatedString;
 }
 
+const scanNumber = (string, lineIndex) => {
+  let numberString = "";
+  let charIndex = 0;
+  for (charIndex = 0; charIndex < string.length; charIndex++){
+    const char = string[charIndex];
+    const tokenData = TOKENS[char] || null;
+    if (tokenData === "NUMBER") {
+      numberString += char;
+    } else if (tokenData === "DOT") {
+      if (numberString[numberString.length - 1] !== ".") {
+        numberString += char;
+      } else {
+        //deux points consécutifs
+        return new Error(`[line ${lineIndex + 1}] Error unexpected "." @ ${charIndex}`);
+      }
+    } else {
+      break;
+    }
+  }
+  const number = Number(numberString);
+  if (Number.isNaN(number)) {
+    return new Error(`[line ${lineIndex + 1}] Error unexpected number, "${numberString}" is ${number}`);
+  } else {
+    return [number, numberString, charIndex];
+  }
+}
 
 const scanChars = fileContent => {
   const lines = fileContent.split("\n");
@@ -92,7 +130,7 @@ const scanChars = fileContent => {
 
       if (tokenData) {
         if (typeof tokenData === "string" || charIndex == line.length - 1) {
-          if (tokenData == "DQUOTE") {
+          if (tokenData === "DQUOTE") {
             const res = scanString(line.substring(charIndex + 1), lineIndex);
             if (res instanceof Error) {
               console.error(res.message);
@@ -103,6 +141,19 @@ const scanChars = fileContent => {
               literal = res;
               lexeme = `"${res}"`;
               charIndex += res.length + 1
+            }
+          } else if (tokenData === "NUMBER") {
+            const res = scanNumber(line.substring(charIndex), lineIndex);
+            if (res instanceof Error) {
+              console.error(res.message);
+              inError = true;
+              break;
+            } else {
+              const [number, numberString, numberIndex] = res;
+              tokenType = "NUMBER";
+              literal = number % 1 ? number.toString() : number.toFixed(1);
+              lexeme = numberString;
+              charIndex += numberIndex - 1;
             }
           } else {
             tokenType = typeof tokenData === "string" ? tokenData : tokenData.default;
