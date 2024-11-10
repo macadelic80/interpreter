@@ -33,21 +33,23 @@ const TOKENS = {
 
 const scan_chars = fileContent => {
   const lines = fileContent.split("\n");
-  lines.forEach(line => {
-    [...line].forEach(char => {
+  let inError = false;
+  lines.forEach((line, line_index) => {
+    [...line].forEach((char, char_index) => {
       const desc = TOKENS[char] || null;
       if (desc)
         console.log(`${desc} ${char} null`);
+      else {
+        console.error(`[line ${line_index + 1}] Error: Unexpected character: ${char}`)
+        inError = true;
+      }
     })
   })
   console.log("EOF  null");
+  return inError ? 65 : 0;
 }
 
 
 const fileContent = fs.readFileSync(filename, "utf8");
 
-if (fileContent.length !== 0) {
-  scan_chars(fileContent);
-} else {
-  console.log("EOF  null");
-}
+process.exit(scan_chars(fileContent));
