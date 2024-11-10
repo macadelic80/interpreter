@@ -17,24 +17,31 @@ if (command !== "tokenize") {
 const filename = args[1];
 
 
-const scan_parenthesis = fileContent => {
+const TOKENS = {
+  "(": "LEFT_PAREN",
+  ")": "RIGHT_PAREN",
+  "{": "LEFT_BRACE",
+  "}": "RIGHT_BRACE",
+}
+
+
+const scan_chars = fileContent => {
   const lines = fileContent.split("\n");
   lines.forEach(line => {
     [...line].forEach(char => {
-      if ("()".includes(char))
-        console.log(`${char === "(" ? "LEFT" : "RIGHT"}_PAREN ${char} null`);
+      const desc = TOKENS[char] || null;
+      if (desc)
+        console.log(`${desc} ${char} null`);
     })
   })
   console.log("EOF  null");
 }
 
 
-// Uncomment this block to pass the first stage
-//
 const fileContent = fs.readFileSync(filename, "utf8");
 
 if (fileContent.length !== 0) {
-  scan_parenthesis(fileContent);
+  scan_chars(fileContent);
 } else {
   console.log("EOF  null");
 }
