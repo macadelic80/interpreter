@@ -18,6 +18,9 @@ const filename = args[1];
 
 
 const TOKENS = {
+  " ": "SPACE",
+  "\t": "TAB",
+  "\n": "NEWLINE",
   "(": "LEFT_PAREN",
   ")": "RIGHT_PAREN",
   "{": "LEFT_BRACE",
@@ -53,19 +56,23 @@ const TOKENS = {
 }
 
 
-const scan_chars = fileContent => {
+const scanChars = fileContent => {
   const lines = fileContent.split("\n");
   let inError = false;
   lines.forEach((line, lineIndex) => {
     let ignoredIndexes = [];
     let ignoredCurrentLine = false;
     [...line].forEach((char, charIndex) => {
-      if (ignoredCurrentLine || ignoredIndexes.includes(charIndex)) {
-        return ;
-      }
       const tokenData = TOKENS[char] || null;
       let tokenName = null;
       let token = null;
+      const isWhiteSpace = ["SPACE", "TAB", "NEWLINE"].includes(tokenData);
+      if (
+        isWhiteSpace ||
+        ignoredCurrentLine ||
+        ignoredIndexes.includes(charIndex)) {
+        return ;
+      }
       if (tokenData) {
         if (typeof tokenData === "string" || charIndex == line.length - 1) {
           tokenName = typeof tokenData === "string" ? tokenData : tokenData.default;
@@ -96,4 +103,4 @@ const scan_chars = fileContent => {
 
 const fileContent = fs.readFileSync(filename, "utf8");
 
-process.exit(scan_chars(fileContent));
+process.exit(scanChars(fileContent));
