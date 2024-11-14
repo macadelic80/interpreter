@@ -90,7 +90,7 @@ class Parser {
         for (const value in primaryValues) {
             if (this.match(value)) return new Literal(primaryValues[value]);
         }
-        if (this.match("NUMBER")) {
+        if (this.match("NUMBER", "STRING")) {
             return new Literal(this.previous.literal);
         }
     }
