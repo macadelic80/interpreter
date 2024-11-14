@@ -27,6 +27,8 @@ const Commands = {
     //   return returnCode;
     // }
     // return printAst(ast);
+
+    // console.log(parsed);
     return printAst(tokens);
   }
 }

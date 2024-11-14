@@ -153,7 +153,7 @@ const scanNumber = (string, lineIndex) => {
 }
 
 const printToken = tokens => {
-    tokens.forEach(({tokenType, lexeme, literal}) => console.log(`${tokenType} ${lexeme} ${literal}`))
+    tokens.forEach(({type, lexeme, literal}) => console.log(`${type} ${lexeme} ${literal}`))
 }
 
 const tokenize = fileContent => {
@@ -165,7 +165,7 @@ const tokenize = fileContent => {
         for (let charIndex = 0; charIndex < line.length; charIndex++) {
             const char = line[charIndex];
             const tokenData = TOKENS[char.toLowerCase()] || null;
-            let tokenType = null;
+            let type = null;
             let lexeme = null;
             let literal = null;
             const isWhiteSpace = ["SPACE", "TAB", "NEWLINE"].includes(tokenData);
@@ -183,7 +183,7 @@ const tokenize = fileContent => {
                             inError = true;
                             break;
                         } else {
-                            tokenType = "STRING";
+                            type = "STRING";
                             literal = res;
                             lexeme = `"${res}"`;
                             charIndex += res.length + 1
@@ -196,7 +196,7 @@ const tokenize = fileContent => {
                             break;
                         } else {
                             const [number, numberString, numberIndex] = res;
-                            tokenType = "NUMBER";
+                            type = "NUMBER";
                             literal = number % 1 ? number.toString() : number.toFixed(1);
                             lexeme = numberString;
                             charIndex += numberIndex - 1;
@@ -210,29 +210,29 @@ const tokenize = fileContent => {
                             break;
                         } else {
                             const isReservedWord = RESERVED_WORDS[res];
-                            tokenType = isReservedWord || "IDENTIFIER";
+                            type = isReservedWord || "IDENTIFIER";
                             lexeme = res;
                             // literal = res;
                             charIndex += res.length - 1
                         }
                     } else {
-                        tokenType = typeof tokenData === "string" ? tokenData : tokenData.default;
+                        type = typeof tokenData === "string" ? tokenData : tokenData.default;
                         lexeme = char;
                     }
                 } else {
                     const nextChar = line[charIndex + 1];
-                    tokenType = tokenData[nextChar] || tokenData.default;
+                    type = tokenData[nextChar] || tokenData.default;
                     lexeme = nextChar in tokenData ? `${char}${nextChar}` : char;
                     if (nextChar in tokenData) {
                         charIndex++;
                     }
                 }
-                if (tokenType === "COMMENT") {
+                if (type === "COMMENT") {
                     break;
                 }
                 tokens.push({
                     type: "token",
-                    tokenType,
+                    type,
                     lexeme,
                     literal
                 });
@@ -244,7 +244,7 @@ const tokenize = fileContent => {
     }
     tokens.push({
         type: "token",
-        tokenType: "EOF",
+        type: "EOF",
         lexeme: "",
         literal: null,
     })
