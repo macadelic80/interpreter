@@ -88,6 +88,10 @@ const printAst = (tokens) => {
 
     const parser = new Parser(tokens);
     const parsed = parser.parse();
+    if (parsed === null) {
+        //error
+        return;
+    }
     console.log(printer.print(parsed));
 }
 
@@ -173,6 +177,8 @@ class Parser {
             this.consume("RIGHT_PAREN", "Expect ')' after expression.")
             return new Grouping(expression);
         }
+
+        throw error(this.peek, "Expect expression.");
     }
 
     match(...types){
@@ -186,7 +192,7 @@ class Parser {
     }
     consume(type, message) {
         if (this.check(type)) return this.advance;
-        throw new Error(this.peek, message);
+        throw error(this.peek, message);
     }
     check(type) {
         if (this.isAtEnd) return false;
@@ -210,12 +216,17 @@ class Parser {
         try {
             return this.expression;
         } catch (e) {
-            console.log("ERROR", e);
+            // console.log("ERROR oco", e);
             return null;
         }
     }
 }
 
+
+const error = (token, message) => {
+    if (token.type === "EOF") console.error(`[line ${token.line}] Error at end: ${message}`);
+    else  console.error(`[line ${token.line}] Error at '${token.lexeme}': ${message}`);
+}
 
 
 export {

@@ -234,7 +234,8 @@ const tokenize = fileContent => {
                     type: "token",
                     type,
                     lexeme,
-                    literal
+                    literal,
+                    line: lineIndex +1,
                 });
             } else {
                 console.error(`[line ${lineIndex + 1}] Error: Unexpected character: ${char}`)
@@ -247,6 +248,7 @@ const tokenize = fileContent => {
         type: "EOF",
         lexeme: "",
         literal: null,
+        line: lines.length,
     })
     const returnCode = inError ?65 : 0;
     return {
