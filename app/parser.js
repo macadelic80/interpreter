@@ -111,7 +111,15 @@ class Parser {
     }
 
     get term() {
-        return this.factor;
+        let expression = this.factor;
+
+        while (this.match("PLUS", "MINUS")) {
+            const operator = this.previous;
+            const right = this.factor;
+            expression = new Binary(expression, operator, right);
+        }
+
+        return expression;
     }
 
     get factor() {
