@@ -39,6 +39,34 @@ const TOKENS = {
   "8": "NUMBER",
   "9": "NUMBER",
 
+  "a": "IDENTIFIER",
+  "b": "IDENTIFIER",
+  "c": "IDENTIFIER",
+  "d": "IDENTIFIER",
+  "e": "IDENTIFIER",
+  "f": "IDENTIFIER",
+  "g": "IDENTIFIER",
+  "h": "IDENTIFIER",
+  "i": "IDENTIFIER",
+  "j": "IDENTIFIER",
+  "k": "IDENTIFIER",
+  "l": "IDENTIFIER",
+  "m": "IDENTIFIER",
+  "n": "IDENTIFIER",
+  "o": "IDENTIFIER",
+  "p": "IDENTIFIER",
+  "q": "IDENTIFIER",
+  "r": "IDENTIFIER",
+  "s": "IDENTIFIER",
+  "t": "IDENTIFIER",
+  "u": "IDENTIFIER",
+  "v": "IDENTIFIER",
+  "w": "IDENTIFIER",
+  "x": "IDENTIFIER",
+  "y": "IDENTIFIER",
+  "z": "IDENTIFIER",
+  "_": "IDENTIFIER",
+
   ",": "COMMA",
   ".": "DOT",
   "-": "MINUS",
@@ -84,6 +112,19 @@ const scanString = (string, lineIndex) => {
   return unterminatedString;
 }
 
+const scanIdentifier = (string, lineIndex) => {
+  let charIndex = 0;
+  for (; charIndex < string.length; charIndex++) {
+    const char = string[charIndex];
+    const tokenData = TOKENS[char.toLowerCase()] || null;
+    if (!["IDENTIFIER", "NUMBER"].includes(tokenData)) {
+      break;
+    }
+  }
+  const literal = string.substring(0, charIndex);
+  return literal
+}
+
 const scanNumber = (string, lineIndex) => {
   let numberString = "";
   let charIndex = 0;
@@ -118,7 +159,7 @@ const scanChars = fileContent => {
     const line = lines[lineIndex];
     for (let charIndex = 0; charIndex < line.length; charIndex++){
       const char = line[charIndex];
-      const tokenData = TOKENS[char] || null;
+      const tokenData = TOKENS[char.toLowerCase()] || null;
       let tokenType = null;
       let lexeme = null;
       let literal = null;
@@ -154,6 +195,19 @@ const scanChars = fileContent => {
               literal = number % 1 ? number.toString() : number.toFixed(1);
               lexeme = numberString;
               charIndex += numberIndex - 1;
+            }
+          } else if (tokenData === "IDENTIFIER") {
+            const res = scanIdentifier(line.substring(charIndex), lineIndex);
+            if (res instanceof Error) {
+              // Il doit pas y avoir d'erreur normalement
+              console.error(res.message);
+              inError = true;
+              break;
+            } else {
+              tokenType = "IDENTIFIER";
+              lexeme = res;
+              // literal = res;
+              charIndex += res.length - 1
             }
           } else {
             tokenType = typeof tokenData === "string" ? tokenData : tokenData.default;
