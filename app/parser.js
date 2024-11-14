@@ -7,10 +7,7 @@ class Expression {
 
 class Visitor extends Expression {
 
-    parenthesize(){
-
-    }
-
+    
 }
 
 
@@ -20,6 +17,14 @@ class AstPrinter extends Visitor {
     }
     visitLiteral(expression){
         return expression.value === null ? "nil" : expression.value.toString();
+    }
+    visitGrouping(expression){
+        return this.parenthesize("group", expression.expression);
+    }
+    parenthesize(name, ...expressions){
+        let string = `(${name} `;
+        string += expressions.map(expression => expression.accept(this)).join(" ");
+        return string + ")";
     }
 }
 class Literal extends Expression {
@@ -44,7 +49,12 @@ class Binary extends Expression {
 
 class Grouping extends Expression {
     constructor(expression){
+        super();
         this.expression = expression;
+    }
+
+    accept(visitor){
+        return visitor.visitGrouping(this);
     }
     
 }
@@ -81,7 +91,7 @@ class Parser {
         return this.primary;
     }
 
-    primary() {
+    get primary() {
         const primaryValues = {
             "FALSE": false,
             "TRUE": true,
@@ -92,6 +102,11 @@ class Parser {
         }
         if (this.match("NUMBER", "STRING")) {
             return new Literal(this.previous.literal);
+        }
+        if (this.match("LEFT_PAREN")) {
+            const expression = this.expression;
+            this.consume("RIGHT_PAREN", "Expect ')' after expression.")
+            return new Grouping(expression);
         }
     }
 
@@ -128,7 +143,7 @@ class Parser {
 
     parse() {
         try {
-            return this.expression();
+            return this.expression;
         } catch (e) {
             console.log("ERROR", e);
             return null;

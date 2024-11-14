@@ -13,7 +13,7 @@
             ],
             "program": "${workspaceFolder}/app/main.js",
             "args": [
-                "tokenize",
+                "parse",
                 "test.lox"
             ]
         }
