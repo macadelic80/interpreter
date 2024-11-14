@@ -21,6 +21,9 @@ class AstPrinter extends Visitor {
     visitGrouping(expression){
         return this.parenthesize("group", expression.expression);
     }
+    visitUnary(expression) {
+        return this.parenthesize(expression.operator.lexeme, expression.right);
+    }
     parenthesize(name, ...expressions){
         let string = `(${name} `;
         string += expressions.map(expression => expression.accept(this)).join(" ");
@@ -61,8 +64,13 @@ class Grouping extends Expression {
 
 class Unary extends Expression {
     constructor(operator, rightExpression){
+        super();
         this.operator = operator;
         this.right = rightExpression;
+    }
+
+    accept(visitor) {
+        return visitor.visitUnary(this);
     }
 }
 
@@ -87,7 +95,16 @@ class Parser {
         return this.equality;
     }
 
-    get equality(){
+    get equality() {
+        return this.unary;
+    }
+
+    get unary() {
+        if (this.match("BANG", "MINUS")) {
+            const operator = this.previous;
+            const expression = this.unary;
+            return new Unary(operator, expression);
+        }
         return this.primary;
     }
 
