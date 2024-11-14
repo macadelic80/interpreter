@@ -16,10 +16,10 @@ const Commands = {
   "parse": ([fileName]) => {
     const fileContent = fs.readFileSync(fileName, "utf8");
     const { returnCode: tokenizerReturnCode, tokens} = tokenize(fileContent);
-    if (tokenizerReturnCode) {
-      console.log("TokenizerError. Can't parse ast.");
-      return tokenizerReturnCode;
-    }
+    // if (tokenizerReturnCode) {
+    //   console.log("TokenizerError. Can't parse ast.");
+    //   return tokenizerReturnCode;
+    // }
     // const {returnCode, ast} = parse(tokens);
     // if (returnCode) {
     //   console.log("ParserError. Can't print tokens");
