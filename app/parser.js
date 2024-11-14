@@ -103,11 +103,27 @@ class Parser {
     }
 
     get equality() {
-        return this.comparison;
+        let expression = this.comparison;
+
+        while (this.match("BANG_EQUAL", "EQUAL_EQUAL")) {
+            const operator = this.previous;
+            const right = this.comparison;
+            expression = new Binary(expression, operator, right);
+        }
+
+        return expression;
     }
 
     get comparison() {
-        return this.term;
+        let expression = this.term;
+
+        while (this.match("GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL")) {
+            const operator = this.previous;
+            const right = this.term;
+            expression = new Binary(expression, operator, right);
+        }
+
+        return expression;
     }
 
     get term() {
