@@ -29,6 +29,7 @@ const Commands = {
     // return printAst(ast);
 
     // console.log(parsed);
+    // const {returnCode, toPrint}
     return printAst(tokens);
   }
 }

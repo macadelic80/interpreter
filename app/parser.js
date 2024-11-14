@@ -90,9 +90,10 @@ const printAst = (tokens) => {
     const parsed = parser.parse();
     if (parsed === null) {
         //error
-        return;
+        return 65;
     }
     console.log(printer.print(parsed));
+    return 0;
 }
 
 
