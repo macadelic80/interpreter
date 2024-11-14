@@ -17,6 +17,25 @@ if (command !== "tokenize") {
 const filename = args[1];
 
 
+const RESERVED_WORDS = {
+  "and": "AND",
+  "class": "CLASS",
+  "else": "ELSE",
+  "false": "FALSE",
+  "for": "FOR",
+  "fun": "FUN",
+  "if": "IF",
+  "nil": "NIL",
+  "or": "OR",
+  "print": "PRINT",
+  "return": "RETURN",
+  "super": "SUPER",
+  "this": "THIS",
+  "true": "TRUE",
+  "var": "VAR",
+  "while": "WHILE",
+};
+
 const TOKENS = {
   " ": "SPACE",
   "\t": "TAB",
@@ -204,7 +223,8 @@ const scanChars = fileContent => {
               inError = true;
               break;
             } else {
-              tokenType = "IDENTIFIER";
+              const isReservedWord = RESERVED_WORDS[res];
+              tokenType = isReservedWord || "IDENTIFIER";
               lexeme = res;
               // literal = res;
               charIndex += res.length - 1
