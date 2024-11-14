@@ -10,7 +10,6 @@ class Visitor extends Expression {
     
 }
 
-
 class AstPrinter extends Visitor {
     print(expression) {
         return expression.accept(this);
@@ -23,6 +22,9 @@ class AstPrinter extends Visitor {
     }
     visitUnary(expression) {
         return this.parenthesize(expression.operator.lexeme, expression.right);
+    }
+    visitBinary(expression) {
+        return this.parenthesize(expression.operator.lexeme, expression.left, expression.right);
     }
     parenthesize(name, ...expressions){
         let string = `(${name} `;
@@ -44,9 +46,14 @@ class Literal extends Expression {
 
 class Binary extends Expression {
     constructor(leftExpression, operator, rightExpression) {
+        super();
         this.left = leftExpression;
         this.operator = operator;
         this.right = rightExpression;
+    }
+
+    accept(visitor) {
+        return visitor.visitBinary(this);
     }
 }
 
@@ -96,9 +103,26 @@ class Parser {
     }
 
     get equality() {
-        return this.unary;
+        return this.comparison;
     }
 
+    get comparison() {
+        return this.term;
+    }
+
+    get term() {
+        return this.factor;
+    }
+
+    get factor() {
+        let expression = this.unary;
+        while (this.match("SLASH", "STAR")) {
+            const operator = this.previous;
+            const right = this.unary;
+            expression = new Binary(expression, operator, right); 
+        }
+        return expression;
+    }
     get unary() {
         if (this.match("BANG", "MINUS")) {
             const operator = this.previous;
