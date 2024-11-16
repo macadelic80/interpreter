@@ -25,7 +25,7 @@ class Interpreter extends Visitor {
         debugger;
         if (expression.operator.type == "MINUS") {
             return -this.interpret(expression.right);
-        } else if (expression.type == "BANG") {
+        } else if (expression.operator.type == "BANG") {
             return !this.interpret(expression.right);
         }
     }
