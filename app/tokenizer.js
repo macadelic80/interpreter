@@ -199,8 +199,11 @@ const tokenize = fileContent => {
                             type = "NUMBER";
                             // literal = number % 1 ? number.toString() : number.toFixed(1);
                             // lexeme = numberString;
+                              // literal = number % 1 ? number.toString() : number.toFixed(1);
+                            // lexeme = numberString;
                             literal = number;
                             lexeme = number % 1 ? number.toString() : number.toFixed(1);
+                            charIndex += numberIndex - 1;
                         }
                     } else if (tokenData === "IDENTIFIER") {
                         const res = scanIdentifier(line.substring(charIndex), lineIndex);

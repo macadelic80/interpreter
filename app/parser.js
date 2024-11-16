@@ -90,6 +90,7 @@ const printAst = (tokens) => {
     const printer = new AstPrinter();
 
     const parser = new Parser(tokens);
+    // console.log(tokens);
     const parsed = parser.parse();
     if (parsed === null) {
         //error
@@ -112,10 +113,11 @@ class Parser {
 
     get equality() {
         let expression = this.comparison;
-
+        // console.log(expression);
         while (this.match("BANG_EQUAL", "EQUAL_EQUAL")) {
             const operator = this.previous;
             const right = this.comparison;
+            console.log("ca marche", operator, right);
             expression = new Binary(expression, operator, right);
         }
 
