@@ -37,6 +37,10 @@ class Interpreter extends Visitor {
             return left * right;
         } else if (operator ===  "SLASH") {
             return left / right;
+        } else if (operator === "PLUS") {
+            return left + right;
+        } else if (operator === "MINUS") {
+            return left - right;
         }
     }
     interpret(expression){
