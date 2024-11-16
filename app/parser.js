@@ -117,7 +117,7 @@ class Parser {
         while (this.match("BANG_EQUAL", "EQUAL_EQUAL")) {
             const operator = this.previous;
             const right = this.comparison;
-            console.log("ca marche", operator, right);
+            // console.log("ca marche", operator, right);
             expression = new Binary(expression, operator, right);
         }
 
