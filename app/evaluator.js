@@ -3,7 +3,7 @@ import { Parser, Visitor } from "./parser.js";
 
 class Interpreter extends Visitor {
     static stringify(value){
-        // console.log(typeof value, value);
+        console.log(typeof value, value);
         if (value === null) {
             return "nil";
         } else if (typeof value === "boolean") {
