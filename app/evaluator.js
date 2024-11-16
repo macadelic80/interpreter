@@ -1,21 +1,22 @@
-import { Parser, Visitor } from "./parser";
+import { Parser, Visitor } from "./parser.js";
 
 
-class InterpreterVisitor extends Visitor {
+class Interpreter extends Visitor {
     visitLiteral(expression){
         return expression.value;
     }
     interpret(expression){
         const value = expression.accept(this);
+        return value;
     }
 }
 
 
-class Interpreter {
-    constructor(){
+// class Interpreter {
+//     constructor(){
 
-    }
-}
+//     }
+// }
 
 
 const interpret = (tokens) => {
@@ -23,7 +24,6 @@ const interpret = (tokens) => {
 
     const parser = new Parser(tokens);
     const parsed = parser.parse();
-    const value = interpreter 
     if (parsed === null) {
         //error
         console.log("erreur parser interpret()");
@@ -31,4 +31,9 @@ const interpret = (tokens) => {
     }
     console.log(interpreter.interpret(parsed));
     return 0;
+}
+
+
+export {
+    interpret
 }

@@ -1,7 +1,7 @@
 import fs from "fs";
 import { printToken, tokenize } from "./tokenizer.js";
 import { printAst } from "./parser.js";
-
+import { interpret } from "./evaluator.js";
 const Commands = {
   "tokenize": ([fileName]) => {
     const fileContent = fs.readFileSync(fileName, "utf8");
@@ -33,6 +33,10 @@ const Commands = {
     return printAst(tokens);
   },
   "evaluate": ([fileName]) => {
+    const fileContent = fs.readFileSync(fileName, "utf8");
+    const { returnCode: tokenizerReturnCode, tokens} = tokenize(fileContent);
+
+    return interpret(tokens);
 
   },
 }
