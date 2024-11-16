@@ -16,7 +16,7 @@ class Interpreter extends Visitor {
     }
     visitLiteral(expression){
         // console.log(expression);
-        if (expression.type === "NUMBER") return expression.literal;
+        if (expression.type === "NUMBER") return +expression.literal;
         return expression.value;
     }
     interpret(expression){
