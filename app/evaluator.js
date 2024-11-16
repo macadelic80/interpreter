@@ -2,6 +2,13 @@ import { Parser, Visitor } from "./parser.js";
 
 
 class Interpreter extends Visitor {
+    static stringify(value){
+        if (value === null) {
+            return "nil";
+        } else if (typeof value === "boolean") {
+            return value;
+        }
+    }
     visitLiteral(expression){
         return expression.value;
     }
@@ -29,7 +36,9 @@ const interpret = (tokens) => {
         console.log("erreur parser interpret()");
         return 65;
     }
-    console.log(interpreter.interpret(parsed));
+    const value = interpreter.interpret(parsed);
+
+    console.log(Interpreter.stringify(value));
     return 0;
 }
 
