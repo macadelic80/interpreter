@@ -3,13 +3,19 @@ import { Parser, Visitor } from "./parser.js";
 
 class Interpreter extends Visitor {
     static stringify(value){
+        // console.log(typeof value, value);
         if (value === null) {
             return "nil";
         } else if (typeof value === "boolean") {
             return value;
+        } else if (typeof value === "string") {
+            return value;
+        } else if (typeof value === "number") {
+            return value;
         }
     }
     visitLiteral(expression){
+        // console.log(expression);
         return expression.value;
     }
     interpret(expression){
