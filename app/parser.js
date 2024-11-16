@@ -177,7 +177,7 @@ class Parser {
             if (this.match(value)) return new Literal(primaryValues[value]);
         }
         if (this.match("NUMBER", "STRING")) {
-            console.log(this.previous);
+            // console.log(this.previous);
             return new Literal(this.previous.lexeme);
         }
         if (this.match("LEFT_PAREN")) {
