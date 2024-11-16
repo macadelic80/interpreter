@@ -33,22 +33,22 @@ class Interpreter extends Visitor {
         const operator = expression.operator.type;
         const left = this.interpret(expression.left);
         const right = this.interpret(expression.right);
-        if (operator === "STAR") {
-            return left * right;
-        } else if (operator ===  "SLASH") {
-            return left / right;
-        } else if (operator === "PLUS") {
-            return left + right;
-        } else if (operator === "MINUS") {
-            return left - right;
-        } else if (operator === "LESS") {
-            return left < right;
-        } else if (operator === "LESS_EQUAL") {
-            return left <= right;
-        } else if (operator === "GREATER") {
-            return left > right;
-        } else if (operator === "GREATER_EQUAL") {
-            return left >= right;
+        const operations = {
+            "STAR": (l, r) => l * r,
+            "SLASH": (l, r) => l / r,
+            "PLUS": (l, r) => l + r,
+            "MINUS": (l, r) => l - r,
+            "LESS": (l, r) => l < r,
+            "LESS_EQUAL": (l, r) => l <= r,
+            "GREATER": (l, r) => l > r,
+            "GREATER_EQUAL": (l, r) => l >= r,
+            "EQUAL_EQUAL": (l, r) => l == r,
+            "BANG_EQUAL": (l, r) => l != r,
+        };
+        if (operator in operations) {
+            return operations[operator](left, right);
+        } else {
+            throw new Error("fatal operator error");
         }
     }
     interpret(expression){
