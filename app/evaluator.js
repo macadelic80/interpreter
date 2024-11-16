@@ -1,4 +1,4 @@
-import { Parser, Visitor } from "./parser.js";
+import { error, Parser, Visitor } from "./parser.js";
 
 
 class Interpreter extends Visitor {
@@ -23,10 +23,14 @@ class Interpreter extends Visitor {
     }
     visitUnary(expression){
         debugger;
+        if (expression.type != "NUMBER") {
+            throw error(expression.operator, "Operand must be a number.")
+        }
+        const right = this.interpret(expression.right);
         if (expression.operator.type == "MINUS") {
-            return -this.interpret(expression.right);
+            return -this.interpret(right);
         } else if (expression.operator.type == "BANG") {
-            return !this.interpret(expression.right);
+            return !this.interpret(right);
         }
     }
     visitBinary(expression) {

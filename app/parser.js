@@ -245,5 +245,6 @@ export {
     printAst,
     Parser,
     Visitor,
+    error,
     // AstPrinter
 }
