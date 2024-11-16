@@ -3,7 +3,6 @@ import { Parser, Visitor } from "./parser.js";
 
 class Interpreter extends Visitor {
     static stringify(value){
-        // console.log(typeof value, value);
         if (value === null) {
             return "nil";
         } else if (typeof value === "boolean") {
@@ -15,24 +14,18 @@ class Interpreter extends Visitor {
         }
     }
     visitLiteral(expression){
-        // console.log(expression);
         if (expression.type === "NUMBER") return +expression.literal;
         else if (expression.type === "STRING") return expression.literal;
         return expression.value;
+    }
+    visitGrouping(expression){
+        return this.interpret(expression.expression);
     }
     interpret(expression){
         const value = expression.accept(this);
         return value;
     }
 }
-
-
-// class Interpreter {
-//     constructor(){
-
-//     }
-// }
-
 
 const interpret = (tokens) => {
     const interpreter = new Interpreter();

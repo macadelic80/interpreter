@@ -7,13 +7,26 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch parse",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/app/main.js",
             "args": [
                 "parse",
+                "test.lox"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch evaluate",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/app/main.js",
+            "args": [
+                "evaluate",
                 "test.lox"
             ]
         }
