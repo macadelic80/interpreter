@@ -31,7 +31,10 @@ const Commands = {
     // console.log(parsed);
     // const {returnCode, toPrint}
     return printAst(tokens);
-  }
+  },
+  "evaluate": ([fileName]) => {
+
+  },
 }
 
 const [commandName, ...args] = process.argv.slice(2);

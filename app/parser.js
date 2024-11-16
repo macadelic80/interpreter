@@ -7,7 +7,10 @@ class Expression {
 
 class Visitor extends Expression {
 
-    
+    visitLiteral(){};
+    visitGrouping(){};
+    visitUnary(){};
+    visitBinary(){};
 }
 
 class AstPrinter extends Visitor {
@@ -233,5 +236,7 @@ const error = (token, message) => {
 export {
     // Parser,
     printAst,
+    Parser,
+    Visitor,
     // AstPrinter
 }
