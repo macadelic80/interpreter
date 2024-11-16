@@ -23,10 +23,10 @@ class Interpreter extends Visitor {
     }
     visitUnary(expression){
         debugger;
-        if (expression.right.type != "NUMBER") {
+        const right = this.interpret(expression.right);
+        if (typeof right != "number") {
             throw error(expression.operator, "Operand must be a number.")
         }
-        const right = this.interpret(expression.right);
         if (expression.operator.type == "MINUS") {
             return -right;
         } else if (expression.operator.type == "BANG") {
