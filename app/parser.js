@@ -18,7 +18,7 @@ class AstPrinter extends Visitor {
         return expression.accept(this);
     }
     visitLiteral(expression){
-        console.log(expression);
+        // console.log(expression);
         return expression.value === null ? "nil" : expression.value.toString();
     }
     visitGrouping(expression){
@@ -177,8 +177,8 @@ class Parser {
             if (this.match(value)) return new Literal(primaryValues[value]);
         }
         if (this.match("NUMBER", "STRING")) {
-            // console.log(this.previous);
-            return new Literal(this.previous.literal);
+            console.log(this.previous);
+            return new Literal(this.previous.lexeme);
         }
         if (this.match("LEFT_PAREN")) {
             const expression = this.expression;
