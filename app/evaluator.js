@@ -29,6 +29,16 @@ class Interpreter extends Visitor {
             return !this.interpret(expression.right);
         }
     }
+    visitBinary(expression) {
+        const operator = expression.operator.type;
+        const left = this.interpret(expression.left);
+        const right = this.interpret(expression.right);
+        if (operator === "STAR") {
+            return left * right;
+        } else if (operator ===  "SLASH") {
+            return left / right;
+        }
+    }
     interpret(expression){
         const value = expression.accept(this);
         return value;
