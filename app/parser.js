@@ -18,6 +18,7 @@ class AstPrinter extends Visitor {
         return expression.accept(this);
     }
     visitLiteral(expression){
+        console.log(expression);
         return expression.value === null ? "nil" : expression.value.toString();
     }
     visitGrouping(expression){
