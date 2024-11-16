@@ -21,6 +21,14 @@ class Interpreter extends Visitor {
     visitGrouping(expression){
         return this.interpret(expression.expression);
     }
+    visitUnary(expression){
+        debugger;
+        if (expression.operator.type == "MINUS") {
+            return -this.interpret(expression.right);
+        } else if (expression.type == "BANG") {
+            return !this.interpret(expression.right);
+        }
+    }
     interpret(expression){
         const value = expression.accept(this);
         return value;
