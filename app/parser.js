@@ -178,7 +178,7 @@ class Parser {
         }
         if (this.match("NUMBER", "STRING")) {
             // console.log(this.previous);
-            return new Literal(this.previous.lexeme);
+            return new Literal(this.previous.type == "NUMBER" ? this.previous.lexeme : this.previous.literal);
         }
         if (this.match("LEFT_PAREN")) {
             const expression = this.expression;

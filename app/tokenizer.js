@@ -241,6 +241,7 @@ const tokenize = fileContent => {
                     literal,
                     line: lineIndex +1,
                 });
+                // console.log(tokens[tokens.length - 1].literal.toString())
             } else {
                 console.error(`[line ${lineIndex + 1}] Error: Unexpected character: ${char}`)
                 inError = true;

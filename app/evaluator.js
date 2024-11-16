@@ -15,7 +15,7 @@ class Interpreter extends Visitor {
         }
     }
     visitLiteral(expression){
-        // console.log(expression);
+        console.log(expression);
         return expression.value;
     }
     interpret(expression){
