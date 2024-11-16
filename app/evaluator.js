@@ -51,6 +51,13 @@ class Interpreter extends Visitor {
             "BANG_EQUAL": (l, r) => l != r,
         };
         if (operator in operations) {
+            if (["SLASH", "STAR"].includes(operator)) {
+                if (typeof left !== "number"){
+                    throw error(expression.operator, "Left operand must be number");
+                } else if (typeof right !== "number") {
+                    throw error(expression.operator, "Right operand must be number");            
+                }
+            }
             return operations[operator](left, right);
         } else {
             throw new Error("fatal operator error");
