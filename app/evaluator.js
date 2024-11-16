@@ -42,7 +42,7 @@ class Interpreter extends Visitor {
             "LESS_EQUAL": (l, r) => l <= r,
             "GREATER": (l, r) => l > r,
             "GREATER_EQUAL": (l, r) => l >= r,
-            "EQUAL_EQUAL": (l, r) => l == r,
+            "EQUAL_EQUAL": (l, r) => l === r,
             "BANG_EQUAL": (l, r) => l != r,
         };
         if (operator in operations) {
