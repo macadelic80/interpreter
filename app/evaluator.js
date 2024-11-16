@@ -41,6 +41,14 @@ class Interpreter extends Visitor {
             return left + right;
         } else if (operator === "MINUS") {
             return left - right;
+        } else if (operator === "LESS") {
+            return left < right;
+        } else if (operator === "LESS_EQUAL") {
+            return left <= right;
+        } else if (operator === "GREATER") {
+            return left > right;
+        } else if (operator === "GREATER_EQUAL") {
+            return left >= right;
         }
     }
     interpret(expression){
