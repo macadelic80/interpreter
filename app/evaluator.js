@@ -78,7 +78,7 @@ const interpret = (tokens) => {
         return 0;
     } catch(e){
         // console.error(e);
-        return 65
+        return 70;
     }
 }
 
