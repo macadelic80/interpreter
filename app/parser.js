@@ -37,9 +37,11 @@ class AstPrinter extends Visitor {
     }
 }
 class Literal extends Expression {
-    constructor(value) {
+    constructor(value, literal, type) {
         super();
         this.value = value;
+        this.literal = literal;
+        this.type = type
     }
 
     accept(visitor) {
@@ -178,7 +180,7 @@ class Parser {
         }
         if (this.match("NUMBER", "STRING")) {
             // console.log(this.previous);
-            return new Literal(this.previous.type == "NUMBER" ? this.previous.lexeme : this.previous.literal);
+            return new Literal(this.previous.lexeme, this.previous.literal, this.previous.type);
         }
         if (this.match("LEFT_PAREN")) {
             const expression = this.expression;

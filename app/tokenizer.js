@@ -198,7 +198,8 @@ const tokenize = fileContent => {
                             const [number, numberString, numberIndex] = res;
                             type = "NUMBER";
                             literal = number % 1 ? number.toString() : number.toFixed(1);
-                            lexeme = +numberString;
+                            lexeme = numberString;
+                            // console.log(literal, lexeme, number, numberString);
                               // literal = number % 1 ? number.toString() : number.toFixed(1);
                             // lexeme = numberString;
                             // literal = number;
