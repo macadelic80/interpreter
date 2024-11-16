@@ -68,13 +68,18 @@ const interpret = (tokens) => {
     const parsed = parser.parse();
     if (parsed === null) {
         //error
-        console.log("erreur parser interpret()");
+        // console.log("erreur parser interpret()");
         return 65;
     }
-    const value = interpreter.interpret(parsed);
-
-    console.log(Interpreter.stringify(value));
-    return 0;
+    try {
+        const value = interpreter.interpret(parsed);
+        
+        console.log(Interpreter.stringify(value));
+        return 0;
+    } catch(e){
+        // console.error(e);
+        return 65
+    }
 }
 
 
