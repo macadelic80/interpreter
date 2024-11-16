@@ -23,14 +23,14 @@ class Interpreter extends Visitor {
     }
     visitUnary(expression){
         debugger;
-        if (expression.type != "NUMBER") {
+        if (expression.right.type != "NUMBER") {
             throw error(expression.operator, "Operand must be a number.")
         }
         const right = this.interpret(expression.right);
         if (expression.operator.type == "MINUS") {
-            return -this.interpret(right);
+            return -right;
         } else if (expression.operator.type == "BANG") {
-            return !this.interpret(right);
+            return !right;
         }
     }
     visitBinary(expression) {
