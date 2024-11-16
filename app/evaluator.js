@@ -65,6 +65,13 @@ class Interpreter extends Visitor {
                     throw error(expression.operator, `Operands must be both string or numbers, actually left (${left}): ${typeof left} and right (${right}): ${typeof right}`);               
                 }
             }
+            if (["GREAT", "GREAT_EQUAL", "LESS", "LESS_EQUAL"].includes(operator)) {
+                if (typeof left !== "number"){
+                    throw error(expression.operator, `Left operand must be number, actually (${left}): ${typeof left}`);
+                } else if (typeof right !== "number") {
+                    throw error(expression.operator, `Right operand must be number, actually (${right}): ${typeof right}`);            
+                }
+            }
             return operations[operator](left, right);
         } else {
             throw new Error("fatal operator error");
