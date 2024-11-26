@@ -1,4 +1,4 @@
-const RESERVED_WORDS = {
+export const RESERVED_WORDS = {
     "and": "AND",
     "class": "CLASS",
     "else": "ELSE",
@@ -199,11 +199,6 @@ const tokenize = fileContent => {
                             type = "NUMBER";
                             literal = number % 1 ? number.toString() : number.toFixed(1);
                             lexeme = numberString;
-                            // console.log(literal, lexeme, number, numberString);
-                              // literal = number % 1 ? number.toString() : number.toFixed(1);
-                            // lexeme = numberString;
-                            // literal = number;
-                            // lexeme = number % 1 ? number.toString() : number.toFixed(1);
                             charIndex += numberIndex - 1;
                         }
                     } else if (tokenData === "IDENTIFIER") {
@@ -217,7 +212,6 @@ const tokenize = fileContent => {
                             const isReservedWord = RESERVED_WORDS[res];
                             type = isReservedWord || "IDENTIFIER";
                             lexeme = res;
-                            // literal = res;
                             charIndex += res.length - 1
                         }
                     } else {
@@ -242,7 +236,6 @@ const tokenize = fileContent => {
                     literal,
                     line: lineIndex +1,
                 });
-                // console.log(tokens[tokens.length - 1].literal.toString())
             } else {
                 console.error(`[line ${lineIndex + 1}] Error: Unexpected character: ${char}`)
                 inError = true;

@@ -1,11 +1,25 @@
-class Expression {
-    
+class Statement {
     accept(){
-
+        
     }
 }
 
-class Visitor extends Expression {
+class Expression {
+    accept(){}
+}
+class ExpressionStatement extends Statement {
+    constructor(expression){
+        super();
+        this.expression = expression;
+    }
+    accept(visitor){
+        return visitor.visitExpressionStatement(this);
+    }
+}
+
+class Visitor {
+    visitExpressionStatement(){};
+    visitPrint(){};
 
     visitLiteral(){};
     visitGrouping(){};
@@ -16,6 +30,17 @@ class Visitor extends Expression {
 class AstPrinter extends Visitor {
     print(expression) {
         return expression.accept(this);
+    }
+
+    visitExpressionStatement(expressionStatement) {
+        return this.print(expressionStatement.expression);
+    }
+
+    visitPrint(printStatement){
+        return this.parenthesize(
+            "PRINT",
+            printStatement.expression,
+        );
     }
     visitLiteral(expression){
         if (expression.type == "STRING") return expression.literal;
@@ -37,6 +62,18 @@ class AstPrinter extends Visitor {
         return string + ")";
     }
 }
+
+class Print extends Statement {
+    constructor(expression) {
+        super();
+        this.expression = expression;
+    }
+    accept(visitor) {
+        return visitor.visitPrint(this);
+    }
+}
+
+
 class Literal extends Expression {
     constructor(value, literal, type) {
         super();
@@ -93,35 +130,55 @@ class Unary extends Expression {
 const printAst = (tokens) => {
     const printer = new AstPrinter();
 
-    const parser = new Parser(tokens);
-    // console.log(tokens);
-    const parsed = parser.parse();
-    if (parsed === null) {
-        //error
+    const parser = new Parser(tokens, true);
+    const stmts = parser.parse();
+    if (stmts.length === 0) {
         return 65;
     }
-    console.log(printer.print(parsed));
+    for (const stmt of stmts) {
+        console.log(printer.print(stmt));
+    }
     return 0;
 }
 
 
 class Parser {
-    constructor(tokens){
+    constructor(tokens, evaluateMode = false){
         this.tokens = tokens;
         this.current = 0;
+        this.evaluateMode = evaluateMode;
     }
 
-    get expression() {
+    get program() {
+        const stmts = [];
+        while(!this.isAtEnd){
+            const stmt = this.statement;
+            stmts.push(stmt);
+        }
+        return stmts;
+    }
+    
+    get statement() {
+        if (this.match("PRINT")) {
+            const expression = this.expression;
+            this.consume("SEMICOLON", "Expect ';' after expression.")
+            return new Print(expression);
+        }
+        return this.expressionStatement;
+    }
+    get expressionStatement(){
+        const expression = this.expression;
+        this.consume("SEMICOLON", "Expect ';' after expression.")
+        return new ExpressionStatement(expression);
+    }
+    get expression(){
         return this.equality;
     }
-
     get equality() {
         let expression = this.comparison;
-        // console.log(expression);
         while (this.match("BANG_EQUAL", "EQUAL_EQUAL")) {
             const operator = this.previous;
             const right = this.comparison;
-            // console.log("ca marche", operator, right);
             expression = new Binary(expression, operator, right);
         }
 
@@ -161,6 +218,7 @@ class Parser {
         }
         return expression;
     }
+
     get unary() {
         if (this.match("BANG", "MINUS")) {
             const operator = this.previous;
@@ -180,7 +238,6 @@ class Parser {
             if (this.match(value)) return new Literal(primaryValues[value]);
         }
         if (this.match("NUMBER", "STRING")) {
-            // console.log(this.previous);
             return new Literal(this.previous.lexeme, this.previous.literal, this.previous.type);
         }
         if (this.match("LEFT_PAREN")) {
@@ -203,6 +260,7 @@ class Parser {
     }
     consume(type, message) {
         if (this.check(type)) return this.advance;
+        if (type == "SEMICOLON" && this.evaluateMode) return ;
         throw error(this.peek, message);
     }
     check(type) {
@@ -225,26 +283,25 @@ class Parser {
 
     parse() {
         try {
-            return this.expression;
+            const stmts = this.program
+            return stmts;
         } catch (e) {
-            // console.log("ERROR oco", e);
-            return null;
+            console.error(e.message)
+            return [];
         }
     }
 }
 
 
 const error = (token, message) => {
-    if (token.type === "EOF") console.error(`[line ${token.line}] Error at end: ${message}`);
-    else  console.error(`[line ${token.line}] Error at '${token.lexeme}': ${message}`);
+    if (token.type === "EOF") throw new Error(`[line ${token.line}] Error at end: ${message}`);
+    else  throw new Error(`[line ${token.line}] Error at '${token.lexeme}': ${message}`);
 }
 
 
 export {
-    // Parser,
     printAst,
     Parser,
     Visitor,
     error,
-    // AstPrinter
 }

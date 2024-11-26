@@ -1,44 +1,32 @@
 import fs from "fs";
 import { printToken, tokenize } from "./tokenizer.js";
 import { printAst } from "./parser.js";
-import { interpret } from "./evaluator.js";
+import { interpret, evaluate } from "./evaluator.js";
 const Commands = {
   "tokenize": ([fileName]) => {
     const fileContent = fs.readFileSync(fileName, "utf8");
     const {returnCode, tokens} = tokenize(fileContent);
-    // if (returnCode) {
-    //   console.log("TokenizerError. Can't print tokens");
-    //   return returnCode;
-    // }
     printToken(tokens);
     return returnCode;
   },
   "parse": ([fileName]) => {
     const fileContent = fs.readFileSync(fileName, "utf8");
     const { returnCode: tokenizerReturnCode, tokens} = tokenize(fileContent);
-    // if (tokenizerReturnCode) {
-    //   console.log("TokenizerError. Can't parse ast.");
-    //   return tokenizerReturnCode;
-    // }
-    // const {returnCode, ast} = parse(tokens);
-    // if (returnCode) {
-    //   console.log("ParserError. Can't print tokens");
-      
-    //   return returnCode;
-    // }
-    // return printAst(ast);
 
-    // console.log(parsed);
-    // const {returnCode, toPrint}
     return printAst(tokens);
   },
   "evaluate": ([fileName]) => {
     const fileContent = fs.readFileSync(fileName, "utf8");
     const { returnCode: tokenizerReturnCode, tokens} = tokenize(fileContent);
 
-    return interpret(tokens);
+    return evaluate(tokens);
 
   },
+  "run": ([fileName]) => {
+    const fileContent = fs.readFileSync(fileName, "utf8");
+    const { returnCode: tokenizerReturnCode, tokens} = tokenize(fileContent);
+    return interpret(tokens);
+  }
 }
 
 const [commandName, ...args] = process.argv.slice(2);

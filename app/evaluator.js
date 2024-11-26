@@ -13,17 +13,25 @@ class Interpreter extends Visitor {
             return value;
         }
     }
+
+    visitExpressionStatement(expressionStatement){
+        return this.execute(expressionStatement.expression);
+    }
+    visitPrint(printStatement){
+        const value = this.execute(printStatement.expression);
+        return console.log(value);
+    }
     visitLiteral(expression){
         if (expression.type === "NUMBER") return +expression.literal;
         else if (expression.type === "STRING") return expression.literal;
         return expression.value;
     }
     visitGrouping(expression){
-        return this.interpret(expression.expression);
+        return this.execute(expression.expression);
     }
     visitUnary(expression){
         debugger;
-        const right = this.interpret(expression.right);
+        const right = this.execute(expression.right);
         const operator = expression.operator.type;
         if (operator === "MINUS" && typeof right != "number") {
             throw error(expression.operator, "Operand must be a number.")
@@ -36,8 +44,8 @@ class Interpreter extends Visitor {
     }
     visitBinary(expression) {
         const operator = expression.operator.type;
-        const left = this.interpret(expression.left);
-        const right = this.interpret(expression.right);
+        const left = this.execute(expression.left);
+        const right = this.execute(expression.right);
         const operations = {
             "STAR": (l, r) => l * r,
             "SLASH": (l, r) => l / r,
@@ -77,9 +85,33 @@ class Interpreter extends Visitor {
             throw new Error("fatal operator error");
         }
     }
-    interpret(expression){
+    execute(expression){
         const value = expression.accept(this);
         return value;
+    }
+    interpret(statements){
+        statements.forEach(statement => {
+            this.execute(statement);
+        })
+    }
+}
+
+const evaluate = (tokens) => {
+    const interpreter = new Interpreter();
+
+    const parser = new Parser(tokens, true);
+    const parsed = parser.parse();
+    if (parsed === null) {
+        return 70;
+    }
+    try {
+        const value = interpreter.execute(parsed[0]);
+        console.log(Interpreter.stringify(value));
+        return 0;
+    } catch (e) {
+        debugger;
+        console.error(e.message);
+        return 70;
     }
 }
 
@@ -88,23 +120,21 @@ const interpret = (tokens) => {
 
     const parser = new Parser(tokens);
     const parsed = parser.parse();
-    if (parsed === null) {
-        //error
-        // console.log("erreur parser interpret()");
+    if (parsed.length === 0) {
         return 65;
     }
     try {
         const value = interpreter.interpret(parsed);
         
-        console.log(Interpreter.stringify(value));
+        Interpreter.stringify(value);
         return 0;
     } catch(e){
-        // console.error(e);
         return 70;
     }
 }
 
 
 export {
-    interpret
+    interpret,
+    evaluate,
 }

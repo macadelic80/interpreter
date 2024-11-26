@@ -29,6 +29,19 @@
                 "evaluate",
                 "test.lox"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch run",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/app/main.js",
+            "args": [
+                "run",
+                "test.lox"
+            ]
         }
     ]
 }
