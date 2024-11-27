@@ -23,7 +23,7 @@ class Interpreter extends Visitor {
     }
     visitPrint(printStatement){
         const value = this.execute(printStatement.expression);
-        return console.log(value);
+        return console.log(Interpreter.stringify(value));
     }
     visitVar(varStatement) {
         const {expression, identifier} = varStatement;
