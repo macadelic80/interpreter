@@ -7,6 +7,19 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch tokenizer",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/app/main.js",
+            "args": [
+                "tokenize",
+                "test.lox"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch parse",
             "skipFiles": [
                 "<node_internals>/**"

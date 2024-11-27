@@ -97,18 +97,26 @@ const TOKENS = {
 }
 
 
-const scanString = (string, lineIndex) => {
-    const unterminatedString = new Error(`[line ${lineIndex + 1}] Error: Unterminated string.`);
-    if (!string.length) {
-        return unterminatedString;
-    }
-    for (let charIndex = 0; charIndex < string.length; charIndex++) {
-        const char = string[charIndex];
-        if (char === "\"") {
-            const literal = string.substring(0, charIndex);
-            return literal;
+const scanString = (fileContent, startIndex, startLine) => {
+    const unterminatedString = new Error(`[line ${startLine}] Error: Unterminated string.`);
+    let charIndex = startIndex;
+    let literal = '';
+    let currentLine = startLine;
+
+    while (charIndex < fileContent.length) {
+        const char = fileContent[charIndex];
+
+        if (char === '"') {
+            return { literal, charIndex, lexeme: `"${literal}"`, currentLine };
         }
+
+        if (char === '\n') currentLine++;
+
+        literal += char;
+        charIndex++;
     }
+
+    // Si on sort de la boucle, il manque le guillemet fermant
     return unterminatedString;
 }
 
@@ -158,103 +166,112 @@ const printToken = tokens => {
 
 const tokenize = fileContent => {
     const tokens = [];
-    const lines = fileContent.split("\n");
+    let currentLine = 1;
+    let charIndex = 0;
     let inError = false;
-    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-        const line = lines[lineIndex];
-        for (let charIndex = 0; charIndex < line.length; charIndex++) {
-            const char = line[charIndex];
-            const tokenData = TOKENS[char.toLowerCase()] || null;
-            let type = null;
-            let lexeme = null;
-            let literal = null;
-            const isWhiteSpace = ["SPACE", "TAB", "NEWLINE"].includes(tokenData);
 
-            if (isWhiteSpace) {
+    while (charIndex < fileContent.length) {
+        const char = fileContent[charIndex];
+        const tokenData = TOKENS[char.toLowerCase()] || null;
+        let type = null;
+        let lexeme = null;
+        let literal = null;
+
+        const isWhiteSpace = ["SPACE", "TAB", "NEWLINE"].includes(tokenData);
+        if (isWhiteSpace) {
+            if (char === "\n") {
+                currentLine++;
+            }
+            charIndex++;
+            continue;
+        }
+
+        if (tokenData) {
+            if (typeof tokenData === "string") {
+                if (tokenData === "DQUOTE") {
+                    const res = scanString(fileContent, charIndex + 1, currentLine);
+                    if (res instanceof Error) {
+                        console.error(res.message);
+                        inError = true;
+                        break;
+                    } else {
+                        ({ literal, lexeme, charIndex, currentLine } = res);
+                        type = "STRING";
+                    }
+                } else if (tokenData === "NUMBER") {
+                    const res = scanNumber(fileContent.substring(charIndex), currentLine);
+                    if (res instanceof Error) {
+                        console.error(res.message);
+                        inError = true;
+                        break;
+                    } else {
+                        const [number, numberString, numberIndex] = res;
+                        type = "NUMBER";
+                        literal = number % 1 ? number.toString() : number.toFixed(1);
+                        lexeme = numberString;
+                        charIndex += numberIndex - 1;
+                    }
+                } else if (tokenData === "IDENTIFIER") {
+                    const res = scanIdentifier(fileContent.substring(charIndex), currentLine);
+                    if (res instanceof Error) {
+                        console.error(res.message);
+                        inError = true;
+                        break;
+                    } else {
+                        const isReservedWord = RESERVED_WORDS[res];
+                        type = isReservedWord || "IDENTIFIER";
+                        lexeme = res;
+                        charIndex += res.length - 1;
+                    }
+                } else {
+                    type = tokenData;
+                    lexeme = char;
+                }
+            } else {
+                const nextChar = fileContent[charIndex + 1];
+                type = tokenData[nextChar] || tokenData.default;
+                lexeme = nextChar in tokenData ? `${char}${nextChar}` : char;
+                if (nextChar in tokenData) {
+                    charIndex++;
+                }
+            }
+
+            if (type === "COMMENT") {
+                while (charIndex < fileContent.length && fileContent[charIndex] !== "\n") {
+                    charIndex++;
+                }
                 continue;
             }
 
-            if (tokenData) {
-                if (typeof tokenData === "string" || charIndex == line.length - 1) {
-                    if (tokenData === "DQUOTE") {
-                        const res = scanString(line.substring(charIndex + 1), lineIndex);
-                        if (res instanceof Error) {
-                            console.error(res.message);
-                            inError = true;
-                            break;
-                        } else {
-                            type = "STRING";
-                            literal = res;
-                            lexeme = `"${res}"`;
-                            charIndex += res.length + 1
-                        }
-                    } else if (tokenData === "NUMBER") {
-                        const res = scanNumber(line.substring(charIndex), lineIndex);
-                        if (res instanceof Error) {
-                            console.error(res.message);
-                            inError = true;
-                            break;
-                        } else {
-                            const [number, numberString, numberIndex] = res;
-                            type = "NUMBER";
-                            literal = number % 1 ? number.toString() : number.toFixed(1);
-                            lexeme = numberString;
-                            charIndex += numberIndex - 1;
-                        }
-                    } else if (tokenData === "IDENTIFIER") {
-                        const res = scanIdentifier(line.substring(charIndex), lineIndex);
-                        if (res instanceof Error) {
-                            // Il doit pas y avoir d'erreur normalement
-                            console.error(res.message);
-                            inError = true;
-                            break;
-                        } else {
-                            const isReservedWord = RESERVED_WORDS[res];
-                            type = isReservedWord || "IDENTIFIER";
-                            lexeme = res;
-                            charIndex += res.length - 1
-                        }
-                    } else {
-                        type = typeof tokenData === "string" ? tokenData : tokenData.default;
-                        lexeme = char;
-                    }
-                } else {
-                    const nextChar = line[charIndex + 1];
-                    type = tokenData[nextChar] || tokenData.default;
-                    lexeme = nextChar in tokenData ? `${char}${nextChar}` : char;
-                    if (nextChar in tokenData) {
-                        charIndex++;
-                    }
-                }
-                if (type === "COMMENT") {
-                    break;
-                }
-                tokens.push({
-                    type: "token",
-                    type,
-                    lexeme,
-                    literal,
-                    line: lineIndex +1,
-                });
-            } else {
-                console.error(`[line ${lineIndex + 1}] Error: Unexpected character: ${char}`)
-                inError = true;
-            }
+            tokens.push({
+                type: "token",
+                type,
+                lexeme,
+                literal,
+                line: currentLine,
+            });
+        } else {
+            console.error(`[line ${currentLine}] Error: Unexpected character: ${char}`);
+            inError = true;
         }
+
+        charIndex++;
     }
+
     tokens.push({
         type: "token",
         type: "EOF",
         lexeme: "",
         literal: null,
-        line: lines.length,
-    })
-    const returnCode = inError ?65 : 0;
+        line: currentLine,
+    });
+
+    const returnCode = inError ? 65 : 0;
     return {
         tokens,
         returnCode
-    }
-}
+    };
+};
 
 export {
     tokenize,
