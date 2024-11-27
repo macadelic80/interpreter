@@ -2,6 +2,10 @@ import { error, Parser, Visitor } from "./parser.js";
 
 
 class Interpreter extends Visitor {
+    constructor(){
+        super();
+        this.variables = new Map();
+    }
     static stringify(value){
         if (value === null) {
             return "nil";
@@ -20,6 +24,19 @@ class Interpreter extends Visitor {
     visitPrint(printStatement){
         const value = this.execute(printStatement.expression);
         return console.log(value);
+    }
+    visitVar(varStatement) {
+        const {expression, identifier} = varStatement;
+        const value = this.execute(expression);
+        this.variables.set(identifier.name, value);
+    }
+    visitIdentifier(identifierExpression) {
+        const {name} = identifierExpression;
+        if (this.variables.has(name)) {
+            const associatedVariable = this.variables.get(name);
+            return associatedVariable;
+        }
+        throw new Error(`Error: ${name} is undefined`);
     }
     visitLiteral(expression){
         if (expression.type === "NUMBER") return +expression.literal;

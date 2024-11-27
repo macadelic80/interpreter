@@ -42,6 +42,16 @@ class AstPrinter extends Visitor {
             printStatement.expression,
         );
     }
+    visitVar(varStatement) {
+        return this.parenthesize(
+            "VAR",
+            varStatement.identifier,
+            varStatement.expression,
+        ); 
+    }
+    visitIdentifier(identifierExpression) {
+        return identifierExpression.name
+    }
     visitLiteral(expression){
         if (expression.type == "STRING") return expression.literal;
         else if (expression.type === "NUMBER") return expression.literal;
@@ -74,6 +84,17 @@ class Print extends Statement {
 }
 
 
+class Var extends Statement {
+    constructor(identifier, expression) {
+        super();
+        this.identifier = identifier;
+        this.expression = expression;
+    }
+    accept(visitor) {
+        return visitor.visitVar(this);
+    }
+}
+
 class Literal extends Expression {
     constructor(value, literal, type) {
         super();
@@ -101,6 +122,16 @@ class Binary extends Expression {
     }
 }
 
+class Identifier extends Expression {
+    constructor(name) {
+        super();
+        this.name = name;
+    }
+
+    accept(visitor) {
+        return visitor.visitIdentifier(this);
+    }
+}
 class Grouping extends Expression {
     constructor(expression){
         super();
@@ -141,7 +172,6 @@ const printAst = (tokens) => {
     return 0;
 }
 
-
 class Parser {
     constructor(tokens, evaluateMode = false){
         this.tokens = tokens;
@@ -150,12 +180,28 @@ class Parser {
     }
 
     get program() {
-        const stmts = [];
+        const declarations = [];
         while(!this.isAtEnd){
-            const stmt = this.statement;
-            stmts.push(stmt);
+            const stmt = this.declaration;
+            declarations.push(stmt);
         }
-        return stmts;
+        return declarations;
+    }
+    
+    get declaration() {
+        if (this.match("VAR")) {
+            this.consume("IDENTIFIER", "Expect variable name after 'var'.");
+            let expression = null;
+            const identifier = new Identifier(this.previous.lexeme);
+            if (this.match("EQUAL")) {
+                expression = this.expression;
+            } else {
+                expression = new Literal(null);
+            }
+            this.consume("SEMICOLON", "Expect ';' after expression.");
+            return new Var(identifier, expression);
+        }
+        return this.statement;
     }
     
     get statement() {
@@ -164,6 +210,7 @@ class Parser {
             this.consume("SEMICOLON", "Expect ';' after expression.")
             return new Print(expression);
         }
+
         return this.expressionStatement;
     }
     get expressionStatement(){
@@ -245,7 +292,9 @@ class Parser {
             this.consume("RIGHT_PAREN", "Expect ')' after expression.")
             return new Grouping(expression);
         }
-
+        if (this.match("IDENTIFIER")) {
+            return new Identifier(this.previous.lexeme);
+        }
         throw error(this.peek, "Expect expression.");
     }
 

@@ -1,3 +1,7 @@
-print "the expression below is invalid";
-49 + "baz";
-print "this should not be printed";
+var adf = "1" + "ok";
+var bds;
+print bds;
+print adf;
+var adf = 654654;
+print adf;
+print ok;
