@@ -129,6 +129,7 @@ const interpret = (tokens) => {
         Interpreter.stringify(value);
         return 0;
     } catch(e){
+        console.error(e.message);
         return 70;
     }
 }

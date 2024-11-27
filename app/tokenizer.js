@@ -116,7 +116,6 @@ const scanString = (fileContent, startIndex, startLine) => {
         charIndex++;
     }
 
-    // Si on sort de la boucle, il manque le guillemet fermant
     return unterminatedString;
 }
 
