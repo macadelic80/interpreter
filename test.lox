@@ -1,7 +1,6 @@
-var adf = "1" + "ok";
-var bds;
-print bds;
-print adf;
-var adf = 654654;
-print adf;
-print ok;
+var a = "ok";
+print a;
+a = "mdr";
+print a;
+b = "ok";
+print b;

@@ -30,6 +30,17 @@ class Interpreter extends Visitor {
         const value = this.execute(expression);
         this.variables.set(identifier.name, value);
     }
+    visitAssignment(assignmentExpression) {
+        const {expression, identifier} = assignmentExpression
+
+        if (this.variables.has(identifier)) {
+            const value = this.execute(expression);
+            this.variables.set(identifier, value);
+            return value;
+        }
+        throw new Error(`Error: ${identifier} is undefined`);
+
+    }
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
         if (this.variables.has(name)) {

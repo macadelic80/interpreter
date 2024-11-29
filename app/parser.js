@@ -49,6 +49,13 @@ class AstPrinter extends Visitor {
             varStatement.expression,
         ); 
     }
+    visitAssignment(assignmentStatement) {
+        return this.parenthesize(
+            "ASSIGN",
+            assignmentStatement.identifier,
+            assignmentStatement.expression,
+        ); 
+    }
     visitIdentifier(identifierExpression) {
         return identifierExpression.name
     }
@@ -92,6 +99,17 @@ class Var extends Statement {
     }
     accept(visitor) {
         return visitor.visitVar(this);
+    }
+}
+
+class Assignment extends Expression {
+    constructor(identifier, expression) {
+        super();
+        this.identifier = identifier;
+        this.expression = expression;
+    }
+    accept(visitor) {
+        return visitor.visitAssignment(this);
     }
 }
 
@@ -219,7 +237,15 @@ class Parser {
         return new ExpressionStatement(expression);
     }
     get expression(){
-        return this.equality;
+        return this.assignment;
+    }
+    get assignment(){
+        const equality = this.equality;
+        if (this.match("EQUAL")) {
+            const expression = this.assignment;
+            return new Assignment(equality.name, expression);
+        }
+        return equality;
     }
     get equality() {
         let expression = this.comparison;

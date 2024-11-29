@@ -11,7 +11,9 @@ statement      → exprStmt
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
 varStmt          "var" identifier "=" expression ";" ;
-expression     → equality ;
+expressiojn    -> assignment
+assignement     -> IDENTIFIER "=" assignment
+                    z| equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
