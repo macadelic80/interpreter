@@ -86,10 +86,12 @@ class Interpreter extends Visitor {
     }
 
     visitIf(ifStatement){
-        const {expression, statement} = ifStatement;
+        const {expression, statementIf, statementElse} = ifStatement;
         const expressionValue = this.execute(expression);
         if (expressionValue){
-            this.execute(statement);
+            this.execute(statementIf);
+        } else if (statementElse) {
+            this.execute(statementElse);
         }
         return null;
     }

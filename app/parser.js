@@ -77,7 +77,8 @@ class AstPrinter extends Visitor {
         return this.parenthesize(
             "IF",
             ifStatement.expression,
-            ifStatement.statement,
+            ifStatement.statementIf,
+            ifStatement.statementElse
         );
     }
     parenthesize(name, ...expressions){
@@ -120,15 +121,17 @@ class Block extends Statement {
 }
 
 class If extends Statement {
-    constructor(expression, statement) {
+    constructor(expression, statementIf, statementElse) {
         super();
         this.expression = expression;
-        this.statement = statement;
+        this.statementIf = statementIf;
+        this.statementElse = statementElse;
     }
     accept(visitor) {
         return visitor.visitIf(this);
     }
 }
+
 
 class Assignment extends Expression {
     constructor(identifier, expression) {
@@ -260,8 +263,12 @@ class Parser {
             this.consume("LEFT_PAREN", "Expect '(' after if statement.");
             const expression = this.expression;
             this.consume("RIGHT_PAREN", "Expect ')' after if expression.");
-            const statement = this.statement;
-            return new If(expression, statement);
+            const statementIf = this.statement;
+            let statementElse = null;
+            if (this.match("ELSE")) {
+                statementElse = this.statement;
+            }
+            return new If(expression, statementIf, statementElse);
         }
         if (this.match("LEFT_BRACE")) {
             const block = new Block(this.block)
