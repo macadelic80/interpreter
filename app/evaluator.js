@@ -1,10 +1,41 @@
 import { error, Parser, Visitor } from "./parser.js";
 
 
+class Environment {
+    constructor(parent = null){
+        this.parent = parent;
+        this.values = new Map();
+    }
+
+    get(variableName) {
+        if (this.values.has(variableName)) {
+            return this.values.get(variableName);
+        }
+        if (this.parent !== null) {
+            return this.parent.get(variableName);
+        }
+        throw new Error(`Error: ${variableName} is undefined`);
+    }
+    assign(variableName, value){
+        if (this.values.has(variableName)) {
+            return this.values.set(variableName, value);
+        }
+        if (this.parent !== null) {
+            return this.parent.assign(variableName, value);
+        }
+
+        throw new Error(`Error: ${variableName} is undefined`);
+    }
+    define(variableName, value) {
+        this.values.set(variableName, value);
+        return value;
+    }
+}
+
 class Interpreter extends Visitor {
     constructor(){
         super();
-        this.variables = new Map();
+        this.env = new Environment();
     }
     static stringify(value){
         if (value === null) {
@@ -28,26 +59,35 @@ class Interpreter extends Visitor {
     visitVar(varStatement) {
         const {expression, identifier} = varStatement;
         const value = this.execute(expression);
-        this.variables.set(identifier.name, value);
+
+        this.env.define(identifier.name, value);
     }
     visitAssignment(assignmentExpression) {
         const {expression, identifier} = assignmentExpression
 
-        if (this.variables.has(identifier)) {
-            const value = this.execute(expression);
-            this.variables.set(identifier, value);
-            return value;
-        }
-        throw new Error(`Error: ${identifier} is undefined`);
-
+        const value = this.execute(expression);
+        this.env.assign(identifier, value);
+        return value;
     }
+    executeBlock(statements, env) {
+        const oldEnv = this.env;
+
+        this.env = env;
+        for (const statement of statements) {
+            this.execute(statement);
+        }
+
+        this.env = oldEnv;
+    }
+    visitBlock(blockStatement){
+        const {statements} = blockStatement;
+        this.executeBlock(statements, new Environment(this.env));
+        return null;
+    }
+
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
-        if (this.variables.has(name)) {
-            const associatedVariable = this.variables.get(name);
-            return associatedVariable;
-        }
-        throw new Error(`Error: ${name} is undefined`);
+        return this.env.get(name);
     }
     visitLiteral(expression){
         if (expression.type === "NUMBER") return +expression.literal;

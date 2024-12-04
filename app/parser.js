@@ -102,6 +102,16 @@ class Var extends Statement {
     }
 }
 
+class Block extends Statement {
+    constructor(statements){
+        super();
+        this.statements = statements;
+    }
+    accept(visitor) {
+        return visitor.visitBlock(this);
+    }
+}
+
 class Assignment extends Expression {
     constructor(identifier, expression) {
         super();
@@ -225,11 +235,25 @@ class Parser {
     get statement() {
         if (this.match("PRINT")) {
             const expression = this.expression;
-            this.consume("SEMICOLON", "Expect ';' after expression.")
+            this.consume("SEMICOLON", "Expect ';' after expression.");
             return new Print(expression);
+        }
+        if (this.match("LEFT_BRACE")) {
+            const block = new Block(this.block)
+            this.consume("RIGHT_BRACE", "Expect '}' after statement block.");
+            return block;
         }
 
         return this.expressionStatement;
+    }
+    get block(){
+        const statements = [];
+        while (!this.isAtEnd && !this.check("RIGHT_BRACE")) {
+            const statement = this.declaration;
+            statements.push(statement);
+
+        }
+        return statements;
     }
     get expressionStatement(){
         const expression = this.expression;
