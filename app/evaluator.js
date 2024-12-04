@@ -85,6 +85,14 @@ class Interpreter extends Visitor {
         return null;
     }
 
+    visitIf(ifStatement){
+        const {expression, statement} = ifStatement;
+        const expressionValue = this.execute(expression);
+        if (expressionValue){
+            this.execute(statement);
+        }
+        return null;
+    }
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
         return this.env.get(name);

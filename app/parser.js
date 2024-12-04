@@ -73,6 +73,13 @@ class AstPrinter extends Visitor {
     visitBinary(expression) {
         return this.parenthesize(expression.operator.lexeme, expression.left, expression.right);
     }
+    visitIf(ifStatement) {
+        return this.parenthesize(
+            "IF",
+            ifStatement.expression,
+            ifStatement.statement,
+        );
+    }
     parenthesize(name, ...expressions){
         let string = `(${name} `;
         string += expressions.map(expression => expression.accept(this)).join(" ");
@@ -109,6 +116,17 @@ class Block extends Statement {
     }
     accept(visitor) {
         return visitor.visitBlock(this);
+    }
+}
+
+class If extends Statement {
+    constructor(expression, statement) {
+        super();
+        this.expression = expression;
+        this.statement = statement;
+    }
+    accept(visitor) {
+        return visitor.visitIf(this);
     }
 }
 
@@ -237,6 +255,13 @@ class Parser {
             const expression = this.expression;
             this.consume("SEMICOLON", "Expect ';' after expression.");
             return new Print(expression);
+        }
+        if (this.match("IF")) {
+            this.consume("LEFT_PAREN", "Expect '(' after if statement.");
+            const expression = this.expression;
+            this.consume("RIGHT_PAREN", "Expect ')' after if expression.");
+            const statement = this.statement;
+            return new If(expression, statement);
         }
         if (this.match("LEFT_BRACE")) {
             const block = new Block(this.block)
