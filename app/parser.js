@@ -85,11 +85,20 @@ class AstPrinter extends Visitor {
             ifStatement.statementElse
         );
     }
-    visitIf(ifStatement) {
+    visitWhile(ifStatement) {
         return this.parenthesize(
             "WHILE",
             ifStatement.expression,
             ifStatement.statement,
+        );
+    }
+    visitFor(forStatement) {
+        return this.parenthesize(
+            "FOR",
+            forStatement.firstExpression,
+            forStatement.secondExpression,
+            forStatement.thirdExpression,
+            forStatement.statement,
         );
     }
     parenthesize(name, ...expressions){
@@ -152,6 +161,20 @@ class While extends Statement {
     }
     accept(visitor) {
         return visitor.visitWhile(this);
+    }
+}
+
+
+class For extends Statement {
+    constructor(firstExpression, secondExpression, thirdExpression, statement) {
+        super();
+        this.firstExpression = firstExpression;
+        this.secondExpression = secondExpression;
+        this.thirdExpression = thirdExpression;
+        this.statement = statement;
+    }
+    accept(visitor) {
+        return visitor.visitFor(this);
     }
 }
 
@@ -310,6 +333,30 @@ class Parser {
             this.consume("RIGHT_PAREN", "Expect ')' after while expression.");
             const statement = this.statement;
             return new While(expression, statement);
+        }
+        if (this.match("FOR")) {
+            this.consume("LEFT_PAREN", "Expect '(' after while statement.");
+            let firstExpression;
+            if (this.match("SEMICOLON")) {
+                firstExpression = null;
+            } else if (this.check("VAR")) {
+                firstExpression = this.declaration
+            } else {
+                firstExpression = this.expressionStatement;
+            }
+            let secondExpression = null;
+            if (!this.check("SEMICOLON")) {
+                secondExpression = this.expression;
+            }
+            let thirdExpression = null;
+            this.consume("SEMICOLON", "Expect ';' after FOR condition.");
+            if (!this.check("RIGHT_PAREN")) {
+                thirdExpression = this.expression;
+            }
+            this.consume("RIGHT_PAREN", "Expect ')' after FOR expression.");
+
+            const statement = this.statement;
+            return new For(firstExpression, secondExpression, thirdExpression, statement);
         }
         if (this.match("LEFT_BRACE")) {
             const block = new Block(this.block)

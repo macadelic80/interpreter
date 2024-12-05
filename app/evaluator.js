@@ -103,7 +103,19 @@ class Interpreter extends Visitor {
         }
         return null;
     }
-
+    visitFor(forStatement) {
+        const {
+            firstExpression,
+            secondExpression,
+            thirdExpression,
+            statement,
+        } = forStatement;
+        if (firstExpression) this.execute(firstExpression);
+        while (secondExpression && this.execute(secondExpression)) {
+            this.execute(statement);
+            if (thirdExpression) this.execute(thirdExpression);
+        }
+    }
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
         return this.env.get(name);
