@@ -95,6 +95,15 @@ class Interpreter extends Visitor {
         }
         return null;
     }
+
+    visitWhile(whileStatement){
+        const {expression, statement} = whileStatement;
+        while (this.execute(expression)) {
+            this.execute(statement);
+        }
+        return null;
+    }
+
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
         return this.env.get(name);

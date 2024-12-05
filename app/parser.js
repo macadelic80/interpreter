@@ -85,6 +85,13 @@ class AstPrinter extends Visitor {
             ifStatement.statementElse
         );
     }
+    visitIf(ifStatement) {
+        return this.parenthesize(
+            "WHILE",
+            ifStatement.expression,
+            ifStatement.statement,
+        );
+    }
     parenthesize(name, ...expressions){
         let string = `(${name} `;
         string += expressions.map(expression => expression.accept(this)).join(" ");
@@ -133,6 +140,18 @@ class If extends Statement {
     }
     accept(visitor) {
         return visitor.visitIf(this);
+    }
+}
+
+
+class While extends Statement {
+    constructor(expression, statement) {
+        super();
+        this.expression = expression;
+        this.statement = statement;
+    }
+    accept(visitor) {
+        return visitor.visitWhile(this);
     }
 }
 
@@ -284,6 +303,13 @@ class Parser {
                 statementElse = this.statement;
             }
             return new If(expression, statementIf, statementElse);
+        }
+        if (this.match("WHILE")) {
+            this.consume("LEFT_PAREN", "Expect '(' after while statement.");
+            const expression = this.expression;
+            this.consume("RIGHT_PAREN", "Expect ')' after while expression.");
+            const statement = this.statement;
+            return new While(expression, statement);
         }
         if (this.match("LEFT_BRACE")) {
             const block = new Block(this.block)

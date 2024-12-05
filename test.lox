@@ -1,7 +1,12 @@
- if (false and "bad") print "quz";
- if (nil and "bad") print "quz";
- 
- if (true and "world") print "world";
- if (10 and "foo") print "foo";
- if ("foo" and "foo") print "foo";
- if ("" and "hello") print "hello";
+var n = 10;
+var fm = 0;
+var fn = 1;
+var index = 0;
+
+while (index < n) {
+  print fm;
+  var temp = fm;
+  fm = fn;
+  fn = temp + fn;
+  index = index + 1;
+}
