@@ -120,6 +120,16 @@ class Interpreter extends Visitor {
             return !right;
         }
     }
+    visitLogicalOp(logicalOpExpression) {
+        const {leftExpression, operator, rightExpression} = logicalOpExpression;
+        const left = this.execute(leftExpression);
+        if (operator.type === "OR") {
+            if (left) return left;
+        } else {
+            if (!left) return left;
+        }
+        return this.execute(rightExpression);
+    }
     visitBinary(expression) {
         const operator = expression.operator.type;
         const left = this.execute(expression.left);

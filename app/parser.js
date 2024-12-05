@@ -73,6 +73,10 @@ class AstPrinter extends Visitor {
     visitBinary(expression) {
         return this.parenthesize(expression.operator.lexeme, expression.left, expression.right);
     }
+    visitLogicalOp(logicalOpExpression) {
+        const {leftExpression, operator, rightExpression} = logicalOpExpression;
+        return this.parenthesize(operator.lexeme, leftExpression, rightExpression);
+    }
     visitIf(ifStatement) {
         return this.parenthesize(
             "IF",
@@ -170,7 +174,18 @@ class Binary extends Expression {
         return visitor.visitBinary(this);
     }
 }
+class LogicalOp extends Expression {
+    constructor(leftExpression, operator, rightExpression) {
+        super();
+        this.leftExpression = leftExpression;
+        this.operator = operator;
+        this.rightExpression = rightExpression;
+    }
 
+    accept(visitor) {
+        return visitor.visitLogicalOp(this);
+    }
+}
 class Identifier extends Expression {
     constructor(name) {
         super();
@@ -295,13 +310,31 @@ class Parser {
     get expression(){
         return this.assignment;
     }
-    get assignment(){
-        const equality = this.equality;
-        if (this.match("EQUAL")) {
-            const expression = this.assignment;
-            return new Assignment(equality.name, expression);
+    get or(){
+        let and = this.and;
+        while (this.match("OR")) {
+            const operator = this.previous;
+            const right = this.and;
+            and = new LogicalOp(and, operator, right);
+        }
+        return and;
+    }
+    get and(){
+        let equality = this.equality;
+        while (this.match("AND")) {
+            const operator = this.previous;
+            const right = this.equality;
+            equality = new LogicalOp(equality, operator, right);
         }
         return equality;
+    }
+    get assignment(){
+        const or = this.or;
+        if (this.match("EQUAL")) {
+            const expression = this.assignment;
+            return new Assignment(or.name, expression);
+        }
+        return or;
     }
     get equality() {
         let expression = this.comparison;
