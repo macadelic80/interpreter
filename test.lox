@@ -1,5 +1,7 @@
-var a = "hello";
-var b = "hello";
-(a = false) or (b = true) or (a = "hello");
-print a;
-print b;
+ if (false and "bad") print "quz";
+ if (nil and "bad") print "quz";
+ 
+ if (true and "world") print "world";
+ if (10 and "foo") print "foo";
+ if ("foo" and "foo") print "foo";
+ if ("" and "hello") print "hello";

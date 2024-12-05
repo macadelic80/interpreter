@@ -123,10 +123,11 @@ class Interpreter extends Visitor {
     visitLogicalOp(logicalOpExpression) {
         const {leftExpression, operator, rightExpression} = logicalOpExpression;
         const left = this.execute(leftExpression);
+        const isLeftTruthly = left || typeof left === "string";
         if (operator.type === "OR") {
-            if (left) return left;
+            if (isLeftTruthly) return left;
         } else {
-            if (!left) return left;
+            if (!isLeftTruthly) return left;
         }
         return this.execute(rightExpression);
     }
