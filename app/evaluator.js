@@ -101,6 +101,8 @@ class Interpreter extends Visitor {
             return value;
         } else if (typeof value === "number") {
             return value;
+        } else if (value instanceof Callable) {
+            return value.toString;
         }
     }
 
@@ -173,7 +175,11 @@ class Interpreter extends Visitor {
     }
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
-        return this.env.get(name);
+        const value = this.env.get(name);
+        // if (value instanceof Callable) {
+        //     return value.toString;
+        // }
+        return value;
     }
     visitCall(callExpression){
         const {args, expression} = callExpression;

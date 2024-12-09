@@ -2,4 +2,4 @@ fun haha(){
     log("mdr");
 }
 print haha;
-print haha();
+haha();
