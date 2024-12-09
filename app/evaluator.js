@@ -8,7 +8,7 @@ class Callable {
 
 const NativesFunction = {
     clock: () => {
-        return Date.now()
+        return ~~(Date.now() / 1000);
     },
     addition: (a, b) => {
         return a + b;

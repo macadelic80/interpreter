@@ -1,4 +1,1 @@
-fun logHaha(a) {
-    log("haha", a);
-}
-logHaha(1, 2);
+print clock() + 84;
