@@ -1,4 +1,5 @@
 fun haha(){
     log("mdr");
 }
-haha();
+print haha;
+print haha();

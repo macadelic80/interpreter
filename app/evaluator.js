@@ -35,7 +35,7 @@ class CallableFunction extends Callable {
         return this.parameters.length;
     }
     get toString(){
-        return `<Function ${this.name}>`
+        return `<fn ${this.name}>`
     }
     call(...args){
         const localEnv = new Environment(this.interpreter.env); 
