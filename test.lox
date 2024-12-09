@@ -1,1 +1,4 @@
-print clock() + 84;
+fun haha(){
+    log("mdr");
+}
+haha();
