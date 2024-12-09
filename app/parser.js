@@ -369,7 +369,9 @@ class Parser {
         const name = this.previous.lexeme;
         this.consume("LEFT_PAREN", "Expect '(' after identifier in function declaration.");
         const parameters = this.parameters;
-        const block = this.statement;
+        this.consume("LEFT_BRACE", "Expect '{' after parameters in function declaration.");
+        const block = new Block(this.block)
+        this.consume("RIGHT_BRACE", "Expect '}' after function block.");
         return new FunctionDeclaration(name, parameters, block);
     }
 

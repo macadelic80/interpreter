@@ -1,5 +1,2 @@
-fun haha(){
-    log("mdr");
-}
-print haha;
-haha();
+fun f() 86
+print f();
