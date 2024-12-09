@@ -27,6 +27,7 @@ class Visitor {
     visitBinary(){};
 }
 
+
 class AstPrinter extends Visitor {
     print(expression) {
         return expression.accept(this);
@@ -99,6 +100,29 @@ class AstPrinter extends Visitor {
             forStatement.secondExpression,
             forStatement.thirdExpression,
             forStatement.statement,
+        );
+    }
+    visitFunction(functionStatement) {
+        return this.parenthesize(
+            "FUNCTION",
+            functionStatement.name,
+            functionStatement.statement,
+        );
+    }
+    visitCall(callExpression) {
+        return this.parenthesize(
+            "CALL",
+            callExpression.expression,
+            ...callExpression.args
+        );
+    }
+    visitFunctionDeclaration(functionDeclarationExpression){
+        const {name, parameters, statement} = functionDeclarationExpression;
+        return this.parenthesize(
+            "FN",
+            name,
+            ...parameters,
+            statement,
         );
     }
     parenthesize(name, ...expressions){
@@ -175,6 +199,32 @@ class For extends Statement {
     }
     accept(visitor) {
         return visitor.visitFor(this);
+    }
+}
+
+
+
+class FunctionDeclaration extends Statement {
+    constructor(name, parameters, statement) {
+        super();
+        this.name = name;
+        this.parameters = parameters;
+        this.statement = statement;
+    }
+    accept(visitor) {
+        return visitor.visitFunctionDeclaration(this);
+    }
+}
+
+
+class Call extends Expression {
+    constructor(expression, args) {
+        super();
+        this.expression = expression;
+        this.args = args;
+    }
+    accept(visitor) {
+        return visitor.visitCall(this);
     }
 }
 
@@ -307,9 +357,37 @@ class Parser {
             this.consume("SEMICOLON", "Expect ';' after expression.");
             return new Var(identifier, expression);
         }
+        if (this.match("FUN")){
+            const fn = this.function;
+            return fn;
+        }
         return this.statement;
     }
     
+    get function(){
+        this.consume("IDENTIFIER", "Expect function name after 'fun'.");
+        const name = this.previous.lexeme;
+        this.consume("LEFT_PAREN", "Expect '(' after identifier in function declaration.");
+        const parameters = this.parameters;
+        const block = this.statement;
+        return new FunctionDeclaration(name, parameters, block);
+    }
+
+    get parameters(){
+        const parameters = [];
+        if (this.match("RIGHT_PAREN")) {
+            return parameters;
+        }
+        this.consume("IDENTIFIER", "Expect identifier after '(' in function parameters declaration.")
+        parameters.push(this.previous.lexeme);
+        while (this.match("COMMA")) {
+            this.consume("IDENTIFIER", "Expect identifier after comma in function parameters declaration.")
+            const param = this.previous.lexeme;
+            parameters.push(param);
+        }
+        this.consume("RIGHT_PAREN", "Expect ')' after call arguments.")
+        return parameters;
+    }
     get statement() {
         if (this.match("PRINT")) {
             const expression = this.expression;
@@ -460,7 +538,36 @@ class Parser {
             const expression = this.unary;
             return new Unary(operator, expression);
         }
-        return this.primary;
+        return this.call;
+    }
+
+    get call() {
+        let primary = this.primary;
+
+        while (true) {
+            if (this.match('LEFT_PAREN')) {
+                const args = this.arguments;
+                primary = new Call(primary, args);
+            } else {
+                break;
+            }
+        }
+        
+        return primary;
+    }
+
+    get arguments(){
+        const args = [];
+        if (this.match("RIGHT_PAREN")) {
+            return args;
+        }
+        args.push(this.expression);
+        while (this.match("COMMA")) {
+            const arg = this.expression;
+            args.push(arg);
+        }
+        this.consume("RIGHT_PAREN", "Expect ')' after call arguments.")
+        return args;
     }
 
     get primary() {

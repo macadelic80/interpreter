@@ -1,6 +1,50 @@
 import { error, Parser, Visitor } from "./parser.js";
 
+class Callable {
+    get arity(){}
+    get toString(){}
+    call(){}
+}
 
+const NativesFunction = {
+    clock: () => {
+        return Date.now()
+    },
+    addition: (a, b) => {
+        return a + b;
+    },
+    log: (...args) => console.log(...args)
+};
+
+class CallableNativeFunction extends Callable {
+    get toString(){
+        return `<Native Function>`
+    }
+}
+
+class CallableFunction extends Callable {
+    constructor(interpreter, name, parameters, expression){
+        super();
+        this.parameters = parameters;
+        this.name = name;
+        this.interpreter = interpreter;
+        this.expression = expression;
+        this.interpreter.env.define(name, this);
+    }
+    get arity(){
+        return this.parameters.length;
+    }
+    get toString(){
+        return `<Function ${this.name}>`
+    }
+    call(...args){
+        const localEnv = new Environment(this.interpreter.env); 
+        for (const [index, name] of this.parameters.entries()) {
+            localEnv.define(name, args[index]);
+        }
+        return this.interpreter.executeBlock(this.expression.statements, localEnv);null;
+    }
+}
 class Environment {
     constructor(parent = null){
         this.parent = parent;
@@ -35,7 +79,18 @@ class Environment {
 class Interpreter extends Visitor {
     constructor(){
         super();
-        this.env = new Environment();
+        this.globals = new Environment();
+        this.env = this.globals;
+        this.defineNativeFunctions();
+    }
+    defineNativeFunctions(){
+        for (const fnName in NativesFunction) {
+            const fn = NativesFunction[fnName];
+            const nativeFn = new CallableNativeFunction();
+            nativeFn._arity = fn.length;
+            nativeFn.call = fn;
+            this.globals.define(fnName, nativeFn);
+        }
     }
     static stringify(value){
         if (value === null) {
@@ -119,6 +174,20 @@ class Interpreter extends Visitor {
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
         return this.env.get(name);
+    }
+    visitCall(callExpression){
+        const {args, expression} = callExpression;
+        const callee = this.execute(expression);
+        if (callee instanceof CallableFunction && args.length != callee.arity) {
+            throw new Error(`Expected ${callee.arity} arguments for ${callee.name} call but got ${args.length}.`);
+        }
+        const argsValue = args.map(arg => this.execute(arg));
+        return callee.call(...argsValue);
+    }
+    visitFunctionDeclaration(functionDeclaration) {
+        const {name, parameters, statement} = functionDeclaration;
+        const fn = new CallableFunction(this, name, parameters, statement);
+        return fn;
     }
     visitLiteral(expression){
         if (expression.type === "NUMBER") return +expression.literal;

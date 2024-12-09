@@ -1,21 +1,4 @@
-var quz = "after";
-{
-  var quz = "before";
-
-  for (var quz = 0; quz < 1; quz = quz + 1) {
-    print quz;
-    var quz = -1;
-    print quz;
-  }
+fun logHaha(a) {
+    log("haha", a);
 }
-
-{
-  for (var quz = 0; quz > 0; quz = quz + 1) {}
-
-  var quz = "after";
-  print quz;
-
-  for (quz = 0; quz < 1; quz = quz + 1) {
-    print quz;
-  }
-}
+logHaha(1, 2);
