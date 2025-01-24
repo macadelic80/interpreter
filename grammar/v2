@@ -14,8 +14,10 @@ statement      → exprStmt
                 | whileStmt
                 | forStmt
                 | printStmt
+                | returnStmt
                 | block ;
 
+returnStmt     → "return" expression? ";" ;
 
 whileStmt       "while" "(" expression ")" statement
 

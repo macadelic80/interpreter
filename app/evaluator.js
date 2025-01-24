@@ -13,7 +13,8 @@ const NativesFunction = {
     addition: (a, b) => {
         return a + b;
     },
-    log: (...args) => console.log(...args)
+    log: (...args) => console.log(...args),
+    floor: Math.floor,
 };
 
 class CallableNativeFunction extends Callable {
@@ -42,9 +43,24 @@ class CallableFunction extends Callable {
         for (const [index, name] of this.parameters.entries()) {
             localEnv.define(name, args[index]);
         }
-        return this.interpreter.executeBlock(this.expression.statements, localEnv);null;
+        try {
+            this.interpreter.executeBlock(this.expression.statements, localEnv);
+        } catch (e) {
+            if (e instanceof ReturnError) {
+                return e.returnExpression;
+            }
+        }
+        return null;
     }
 }
+
+class ReturnError extends Error {
+    constructor(value) {
+        super("");
+        this.returnExpression = value;
+    }
+}
+
 class Environment {
     constructor(parent = null){
         this.parent = parent;
@@ -127,14 +143,17 @@ class Interpreter extends Visitor {
         return value;
     }
     executeBlock(statements, env) {
-        const oldEnv = this.env;
+        const previous = this.env;
 
-        this.env = env;
-        for (const statement of statements) {
-            this.execute(statement);
+        try {
+            this.env = env;
+            for (const statement of statements) {
+                this.execute(statement);
+            }
+        } finally {
+            this.env = previous;
         }
 
-        this.env = oldEnv;
     }
     visitBlock(blockStatement){
         const {statements} = blockStatement;
@@ -173,12 +192,14 @@ class Interpreter extends Visitor {
             if (thirdExpression) this.execute(thirdExpression);
         }
     }
+    visitReturn(returnStatement) {
+        let value = null;
+        if (returnStatement.value !== null) value = this.execute(returnStatement.value);
+        throw new ReturnError(value);
+    }
     visitIdentifier(identifierExpression) {
         const {name} = identifierExpression;
         const value = this.env.get(name);
-        // if (value instanceof Callable) {
-        //     return value.toString;
-        // }
         return value;
     }
     visitCall(callExpression){
@@ -186,6 +207,9 @@ class Interpreter extends Visitor {
         const callee = this.execute(expression);
         if (callee instanceof CallableFunction && args.length != callee.arity) {
             throw new Error(`Expected ${callee.arity} arguments for ${callee.name} call but got ${args.length}.`);
+        }
+        if (!(callee instanceof Callable)) {
+            throw new Error(`Can only call function and classes, not ${callee.constructor.name} (${expression.constructor.name}).`);
         }
         const argsValue = args.map(arg => this.execute(arg));
         return callee.call(...argsValue);
@@ -233,6 +257,7 @@ class Interpreter extends Visitor {
         const right = this.execute(expression.right);
         const operations = {
             "STAR": (l, r) => l * r,
+            "MODULO": (l, r) => l % r,
             "SLASH": (l, r) => l / r,
             "PLUS": (l, r) => l + r,
             "MINUS": (l, r) => l - r,
@@ -244,7 +269,7 @@ class Interpreter extends Visitor {
             "BANG_EQUAL": (l, r) => l != r,
         };
         if (operator in operations) {
-            if (["SLASH", "STAR", "MINUS"].includes(operator)) {
+            if (["SLASH", "STAR", "MINUS", "MODULO"].includes(operator)) {
                 if (typeof left !== "number"){
                     throw error(expression.operator, `Left operand must be number, actually (${left}): ${typeof left}`);
                 } else if (typeof right !== "number") {
@@ -309,12 +334,10 @@ const interpret = (tokens) => {
         return 65;
     }
     try {
-        const value = interpreter.interpret(parsed);
-        
+        const value = interpreter.interpret(parsed);      
         Interpreter.stringify(value);
         return 0;
     } catch(e){
-        console.error(e.message);
         return 70;
     }
 }

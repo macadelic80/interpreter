@@ -73,6 +73,7 @@ const TOKENS = {
     "+": "PLUS",
     ";": "SEMICOLON",
     "*": "STAR",
+    // "%": "MODULO",
 
     "/": {
         "default": "SLASH",

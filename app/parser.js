@@ -102,6 +102,12 @@ class AstPrinter extends Visitor {
             forStatement.statement,
         );
     }
+    visitReturn(forStatement) {
+        return this.parenthesize(
+            "RETURN",
+            forStatement.expression,
+        );
+    }
     visitFunction(functionStatement) {
         return this.parenthesize(
             "FUNCTION",
@@ -199,6 +205,17 @@ class For extends Statement {
     }
     accept(visitor) {
         return visitor.visitFor(this);
+    }
+}
+
+
+class Return extends Statement {
+    constructor(value) {
+        super();
+        this.value = value;
+    }
+    accept(visitor) {
+        return visitor.visitReturn(this);
     }
 }
 
@@ -396,6 +413,15 @@ class Parser {
             this.consume("SEMICOLON", "Expect ';' after expression.");
             return new Print(expression);
         }
+        if (this.match("RETURN")) {
+            let value = null;
+
+            if (!this.check("SEMICOLON")) {
+                value = this.expression;
+            }
+            this.consume("SEMICOLON", "Expect ';' after return statement value.");
+            return new Return(value);
+        }
         if (this.match("IF")) {
             this.consume("LEFT_PAREN", "Expect '(' after if statement.");
             const expression = this.expression;
@@ -439,11 +465,11 @@ class Parser {
             return new For(firstExpression, secondExpression, thirdExpression, statement);
         }
         if (this.match("LEFT_BRACE")) {
-            const block = new Block(this.block)
-            this.consume("RIGHT_BRACE", "Expect '}' after statement block.");
+            const block = new Block(this.block);
+            this.consume("RIGHT_BRACE", "Expect '}' after block.");
             return block;
         }
-
+        
         return this.expressionStatement;
     }
     get block(){
@@ -451,7 +477,6 @@ class Parser {
         while (!this.isAtEnd && !this.check("RIGHT_BRACE")) {
             const statement = this.declaration;
             statements.push(statement);
-
         }
         return statements;
     }
@@ -526,8 +551,9 @@ class Parser {
 
     get factor() {
         let expression = this.unary;
+        // while (this.match("SLASH", "STAR", "MODULO")) {
         while (this.match("SLASH", "STAR")) {
-            const operator = this.previous;
+                const operator = this.previous;
             const right = this.unary;
             expression = new Binary(expression, operator, right); 
         }
@@ -632,7 +658,6 @@ class Parser {
             const stmts = this.program
             return stmts;
         } catch (e) {
-            console.error(e.message)
             return [];
         }
     }
